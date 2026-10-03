@@ -266,7 +266,7 @@ export function Intro({ onDone }: { onDone: () => void }) {
                 <path d="M0 64 L50 33 L100 64" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="0.35" />
               </svg>
             </div>
-            <div data-flap className="env-flap">
+            <div data-flap data-env-part className="env-flap">
               <div className="flap-face flap-front">
                 <div data-seal className="env-seal">
                   <svg viewBox="0 0 48 44" width="100%" height="100%">

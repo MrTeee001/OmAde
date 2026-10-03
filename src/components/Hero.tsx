@@ -71,7 +71,8 @@ export function Hero({ withCube, lite, intro }: Props) {
     document.fonts?.ready.then(() => ScrollTrigger.refresh())
 
     // Only draw the 3D layer while the hero is on screen.
-    const io = new IntersectionObserver(([entry]) => setActive(entry.isIntersecting))
+    // Several updates can arrive at once (e.g. while the pin is re-measured); the last is current.
+    const io = new IntersectionObserver((entries) => setActive(entries[entries.length - 1].isIntersecting))
     io.observe(section)
 
     return () => {
