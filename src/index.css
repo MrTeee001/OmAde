@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-base: #fbf9fa;
+  --color-ink: #1f2340;
+  --color-ink-soft: #5b6078;
+  --color-rose: #f58fb5;
+  --color-sky: #6fa8f5;
+  --color-baby-blue: #cfe3ff;
+  --color-blush: #ffd3e4;
+
+  --font-display: 'Fraunces Variable', 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 24px;
+  --shadow-card: 0 8px 30px rgba(111, 168, 245, 0.12);
+}
+
+@layer base {
+  html {
+    background: var(--color-base);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    /* Transparent so the fixed colour fields (behind the content) show through. */
+    background: transparent;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: var(--color-blush);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* Page container: 1120px max, 24px side padding. */
+  .shell {
+    width: 100%;
+    max-width: calc(1120px + 48px);
+    margin-inline: auto;
+    padding-inline: 24px;
+  }
+  /* Sections sit 96px apart on mobile, 160px on desktop. */
+  .section-gap {
+    margin-top: 96px;
+  }
+  @media (min-width: 768px) {
+    .section-gap {
+      margin-top: 160px;
+    }
+  }
+  .label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+  /* Fraunces' "soft" axis rounds the letter shapes for a gentler feel. */
+  .font-display,
+  .heading {
+    font-variation-settings: 'SOFT' 100, 'WONK' 0;
+  }
+  .heading {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    font-size: clamp(40px, 6vw + 16px, 96px);
+  }
+  @media (max-width: 767px) {
+    .heading {
+      font-size: clamp(40px, 11vw, 52px);
+    }
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid #ffffff;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* ── Drifting background colour fields (40s loop) ─────────── */
+@keyframes drift-a {
+  0%, 100% { transform: translate3d(-8%, -6%, 0) scale(1); }
+  50% { transform: translate3d(10%, 8%, 0) scale(1.12); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate3d(8%, 4%, 0) scale(1.08); }
+  50% { transform: translate3d(-10%, -8%, 0) scale(0.95); }
+}
+@keyframes drift-c {
+  0%, 100% { transform: translate3d(0, 8%, 0) scale(1); }
+  50% { transform: translate3d(-6%, -10%, 0) scale(1.15); }
+}
+.field {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  will-change: transform;
+}
+.field-a { animation: drift-a 40s ease-in-out infinite; }
+.field-b { animation: drift-b 40s ease-in-out infinite; }
+.field-c { animation: drift-c 40s ease-in-out infinite; }
+
+/* ── Small hearts drifting upward ─────────────────────────── */
+@keyframes float-up {
+  0% { transform: translate3d(0, 0, 0) rotate(-8deg); opacity: 0; }
+  12% { opacity: var(--heart-opacity, 0.18); }
+  50% { transform: translate3d(var(--heart-sway, 16px), -55vh, 0) rotate(6deg); }
+  88% { opacity: var(--heart-opacity, 0.18); }
+  100% { transform: translate3d(0, -115vh, 0) rotate(-6deg); opacity: 0; }
+}
+.floating-heart {
+  position: absolute;
+  bottom: -40px;
+  opacity: 0;
+  animation: float-up linear infinite;
+  will-change: transform, opacity;
+}
+
+/* ── Scroll hint heart ────────────────────────────────────── */
+@keyframes soft-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+.bounce-soft { animation: soft-bounce 2.4s ease-in-out infinite; }
+
+/* Hidden until GSAP reveals it (only when motion is allowed). */
+.js-motion [data-reveal] { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .field, .bounce-soft { animation: none; }
+  .floating-heart { display: none; }
+}
