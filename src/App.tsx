@@ -6,6 +6,11 @@ import { Background } from './components/Background'
 import { FloatingHearts } from './components/FloatingHearts'
 import { Hero } from './components/Hero'
 import { Intro } from './components/Intro'
+import { Story } from './components/sections/Story'
+import { LittleThings } from './components/sections/LittleThings'
+import { Reel } from './components/sections/Reel'
+import { Letters } from './components/sections/Letters'
+import { Closing } from './components/sections/Closing'
 import { CubeGrid } from './components/CubeGrid'
 import { prefersReducedMotion } from './lib/motion'
 import { hasWebGL, isLiteDevice } from './lib/device'
@@ -93,15 +98,11 @@ export default function App() {
         <Hero withCube={withCube} lite={lite} intro={intro} />
         {!withCube && <CubeGrid />}
 
-        {/* Next stages (cube, story, reels, letters…) will be added below. */}
-        <section id="next" className="shell section-gap pb-40">
-          <div className="card mx-auto max-w-[560px] px-8 py-12 text-center" data-reveal>
-            <p className="label">Coming soon</p>
-            <p className="mt-4 font-display text-[28px] italic leading-snug text-ink">
-              More of our story is on its way.
-            </p>
-          </div>
-        </section>
+        <Story />
+        <LittleThings />
+        <Reel />
+        <Letters />
+        <Closing />
       </main>
     </>
   )

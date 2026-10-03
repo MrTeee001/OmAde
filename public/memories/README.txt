@@ -8,3 +8,6 @@ Names to use (any of .jpg, .png, .webp or .mp4):
 
 Example: story-01.jpg, reel-2.mp4, closing.webp
 If a file is missing, the site shows a soft placeholder tile instead.
+
+Optional: a still picture shown before a video loads. Name it like the
+video with "-poster" added, e.g. reel-1-poster.jpg for reel-1.mp4.

@@ -64,34 +64,43 @@ export const memories = {
     { date: '[Date 20]', title: '[Title 20]', caption: '[Placeholder] What happened on this day.', media: 'story-20' },
   ],
 
-  // ── Short clips (files reel-1 … reel-4) ───────────────────
+  // ── Moving pictures: short clips (files reel-1 … reel-4) ──
+  // Optional poster pictures: reel-1-poster.jpg etc. (shown until the clip loads).
   reels: ['reel-1', 'reel-2', 'reel-3', 'reel-4'],
 
-  // ── Little love lines ─────────────────────────────────────
-  loveLines: [
-    '[Placeholder] A small thing I love about you.',
-    '[Placeholder] Another small thing I love about you.',
-    '[Placeholder] One more small thing I love about you.',
-    '[Placeholder] And one more, because there are many.',
-  ],
+  // ── The little things ─────────────────────────────────────
+  // One short line per card. Add or remove lines freely.
+  loveLines: {
+    // Ade writing about Omolade (shown in blue)
+    adeOnOmolade: [
+      '[Placeholder] The way you laugh at your own jokes first.',
+      '[Placeholder] How you remember every small thing I say.',
+      '[Placeholder] Your voice notes that start with a sigh.',
+      '[Placeholder] How calm everything feels when you are near.',
+    ],
+    // Omolade writing about Ade (shown in rose)
+    omoladeOnAde: [
+      '[Placeholder] How you always walk on the outside of the road.',
+      '[Placeholder] The face you make when you are thinking.',
+      '[Placeholder] That you never let me end a day sad.',
+      '[Placeholder] How you say my full name, slowly.',
+    ],
+  },
 
   // ── The two letters ───────────────────────────────────────
-  // Each paragraph is its own line in the list.
+  // The greeting ("Omolade," / "Ade,") and the sign-off ("Yours, Ade" /
+  // "Yours, Omolade") are added automatically. Each paragraph is its own item.
   letters: {
-    fromFirst: {
-      to: 'Omolade',
-      from: 'Ade',
+    fromAde: {
       paragraphs: [
-        '[Placeholder] Ade’s letter to Omolade, first paragraph.',
-        '[Placeholder] Second paragraph.',
+        '[Placeholder] Ade’s letter to Omolade. Write the first paragraph here.',
+        '[Placeholder] Then a second paragraph, as long or as short as you like.',
       ],
     },
-    fromSecond: {
-      to: 'Ade',
-      from: 'Omolade',
+    fromOmolade: {
       paragraphs: [
-        '[Placeholder] Omolade’s letter to Ade, first paragraph.',
-        '[Placeholder] Second paragraph.',
+        '[Placeholder] Omolade’s letter to Ade. Write the first paragraph here.',
+        '[Placeholder] Then a second paragraph, as long or as short as you like.',
       ],
     },
   },

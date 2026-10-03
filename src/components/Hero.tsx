@@ -182,7 +182,7 @@ export function Hero({ withCube, lite, intro }: Props) {
 
       <a
         ref={hintRef}
-        href="#next"
+        href="#story"
         className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink md:bottom-8"
         aria-label="Scroll down"
       >
