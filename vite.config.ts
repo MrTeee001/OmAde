@@ -9,4 +9,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), memoriesManifest()],
   server: { host: true, port: 5173 },
   preview: { host: true, port: 4173 },
+  // The 3D library (three.js) is one large file, loaded separately after the text appears.
+  build: { chunkSizeWarningLimit: 1000 },
 })

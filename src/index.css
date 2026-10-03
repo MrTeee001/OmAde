@@ -137,10 +137,98 @@
 }
 .bounce-soft { animation: soft-bounce 2.4s ease-in-out infinite; }
 
+/* ── Cube stage ───────────────────────────────────────────── */
+.cube-slot {
+  cursor: grab;
+  touch-action: pan-y; /* sideways drags turn the cube, up/down still scrolls */
+}
+.cube-slot:active { cursor: grabbing; }
+
+/* Card size: 3×2 on desktop, 2×3 on mobile, always fitting one screen. */
+.cube-grid-list {
+  --card: min(
+    calc((100vw - 48px - 2 * 16px) / 2),
+    calc((100svh - 260px) / 3)
+  );
+  grid-template-columns: repeat(2, var(--card));
+  column-gap: 16px;
+  row-gap: 12px;
+}
+@media (min-width: 768px) {
+  .cube-grid-list {
+    --card: min(300px, calc((100vw - 48px - 2 * 32px) / 3), calc((100svh - 240px) / 2));
+    grid-template-columns: repeat(3, var(--card));
+    column-gap: 32px;
+    row-gap: 20px;
+  }
+}
+.cube-grid { pointer-events: none; }
+.cube-grid.is-live { pointer-events: auto; }
+.cube-grid:not(.is-live) .card-spot { visibility: hidden; }
+.card-spot {
+  border-radius: 24px;
+  cursor: zoom-in;
+  outline: none;
+  transition: box-shadow 0.4s ease;
+  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+}
+.card-spot:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--color-rose); }
+.cube-caption {
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 100%;
+  min-height: 2.8em;
+  opacity: 0;
+}
+@media (min-width: 768px) {
+  .cube-caption { font-size: 15px; }
+}
+
+/* Simple grid (reduced motion) buttons */
+.card-button { border-radius: 24px; cursor: zoom-in; outline: none; }
+.card-button:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--color-rose); }
+
+/* ── Lightbox ─────────────────────────────────────────────── */
+.lightbox {
+  background: rgba(251, 249, 250, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.lightbox .lightbox-panel {
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lightbox.is-shown { opacity: 1; }
+.lightbox.is-shown .lightbox-panel { transform: none; }
+.pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #fff;
+  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+.pill-button:hover { background: #fff; }
+.pill-button:focus-visible { outline: 2px solid var(--color-rose); outline-offset: 2px; }
+
+/* ── Small or slow devices: calmer background ─────────────── */
+.lite .field { animation: none; filter: blur(60px); }
+.lite .floating-heart:nth-child(odd) { display: none; }
+
 /* Hidden until GSAP reveals it (only when motion is allowed). */
 .js-motion [data-reveal] { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .field, .bounce-soft { animation: none; }
+  .lightbox, .lightbox .lightbox-panel { transition: none; }
   .floating-heart { display: none; }
 }

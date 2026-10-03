@@ -5,15 +5,24 @@ import Lenis from 'lenis'
 import { Background } from './components/Background'
 import { FloatingHearts } from './components/FloatingHearts'
 import { Hero } from './components/Hero'
+import { CubeGrid } from './components/CubeGrid'
 import { prefersReducedMotion } from './lib/motion'
+import { hasWebGL, isLiteDevice } from './lib/device'
+import { setLenis } from './lib/scroll'
 
 gsap.registerPlugin(ScrollTrigger)
+ScrollTrigger.config({ ignoreMobileResize: true })
+
+// Decided once per visit: full 3D story, or a calm static grid.
+const lite = isLiteDevice()
+const withCube = !prefersReducedMotion() && hasWebGL()
 
 /** Smooth scrolling with Lenis, kept in step with GSAP ScrollTrigger. */
 function useSmoothScroll() {
   useEffect(() => {
     if (prefersReducedMotion()) return
     const lenis = new Lenis({ duration: 1.2, smoothWheel: true })
+    setLenis(lenis)
     lenis.on('scroll', ScrollTrigger.update)
     const raf = (time: number) => lenis.raf(time * 1000)
     gsap.ticker.add(raf)
@@ -34,6 +43,7 @@ function useSmoothScroll() {
     return () => {
       document.removeEventListener('click', onClick)
       gsap.ticker.remove(raf)
+      setLenis(null)
       lenis.destroy()
     }
   }, [])
@@ -72,7 +82,8 @@ export default function App() {
       <Background />
       <FloatingHearts />
       <main>
-        <Hero />
+        <Hero withCube={withCube} lite={lite} />
+        {!withCube && <CubeGrid />}
 
         {/* Next stages (cube, story, reels, letters…) will be added below. */}
         <section id="next" className="shell section-gap pb-40">
