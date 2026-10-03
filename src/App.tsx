@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import { Background } from './components/Background'
 import { FloatingHearts } from './components/FloatingHearts'
 import { Hero } from './components/Hero'
+import { Intro } from './components/Intro'
 import { CubeGrid } from './components/CubeGrid'
 import { prefersReducedMotion } from './lib/motion'
 import { hasWebGL, isLiteDevice } from './lib/device'
@@ -23,10 +24,11 @@ function useSmoothScroll() {
     if (prefersReducedMotion()) return
     const lenis = new Lenis({ duration: 1.2, smoothWheel: true })
     setLenis(lenis)
+    // Stay still while the opening sequence plays; it starts scrolling again when done.
+    if (document.documentElement.classList.contains('intro')) lenis.stop()
     lenis.on('scroll', ScrollTrigger.update)
     const raf = (time: number) => lenis.raf(time * 1000)
     gsap.ticker.add(raf)
-    gsap.ticker.lagSmoothing(0)
 
     // Let in-page links (like the scroll hint) glide too.
     const onClick = (e: MouseEvent) => {
@@ -76,13 +78,19 @@ function useReveal() {
 export default function App() {
   useSmoothScroll()
   useReveal()
+  const [intro, setIntro] = useState(true)
+  const endIntro = useCallback(() => {
+    document.documentElement.classList.remove('intro')
+    setIntro(false)
+  }, [])
 
   return (
     <>
+      {intro && <Intro onDone={endIntro} />}
       <Background />
       <FloatingHearts />
       <main>
-        <Hero withCube={withCube} lite={lite} />
+        <Hero withCube={withCube} lite={lite} intro={intro} />
         {!withCube && <CubeGrid />}
 
         {/* Next stages (cube, story, reels, letters…) will be added below. */}

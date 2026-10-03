@@ -8,6 +8,11 @@ import '@fontsource-variable/fraunces/full-italic.css'
 import '@fontsource-variable/manrope/index.css'
 import './index.css'
 
+// The opening sequence plays on every load, always from the top of the page.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+window.scrollTo(0, 0)
+document.documentElement.classList.add('intro')
+
 // Hide reveal-able text before first paint, only when animations will run.
 if (!prefersReducedMotion()) document.documentElement.classList.add('js-motion')
 // Calmer background effects on small or slow devices.

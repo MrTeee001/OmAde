@@ -6,6 +6,7 @@ import { memories } from '../../memories'
 import { createFaceMaterial } from './faceMaterial'
 import { createFaceTexture } from './textures'
 import { PHASES, type Stage } from './stage'
+import { markHeroReady } from '../../lib/ready'
 
 // ── Small maths helpers ────────────────────────────────────────
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
@@ -162,7 +163,11 @@ function Scene({ stage, active, lite }: Props) {
     [],
   )
 
+  // Tell the page the cube is ready after a few drawn frames (shaders compiled, textures uploaded).
+  const frames = useRef(0)
+
   useFrame((state, delta) => {
+    if (++frames.current === 3) markHeroReady()
     const dt = Math.min(delta, 1 / 20)
     const p = stage.progress
     const t = state.clock.elapsedTime

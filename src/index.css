@@ -19,6 +19,8 @@
 @layer base {
   html {
     background: var(--color-base);
+    /* Keep the scrollbar space reserved, so locking scroll never shifts the layout. */
+    scrollbar-gutter: stable;
     -webkit-text-size-adjust: 100%;
   }
   body {
@@ -224,11 +226,170 @@
 .lite .field { animation: none; filter: blur(60px); }
 .lite .floating-heart:nth-child(odd) { display: none; }
 
+/* ── Opening sequence ─────────────────────────────────────── */
+.intro-layer {
+  touch-action: none;
+  overflow: hidden;
+}
+/* While it plays: the hero heading waits for the names to land on it, and the
+   counter, cube and scroll hint wait to fade in afterwards. */
+.intro [data-intro-target] { visibility: hidden; }
+.intro [data-intro-fade] { opacity: 0; }
+[data-late],
+.cube-canvas { transition: opacity 0.6s ease; }
+.intro [data-late],
+.intro .cube-canvas { opacity: 0; }
+
+.envelope {
+  --env-w: min(520px, 82vw);
+  position: relative;
+  width: var(--env-w);
+  height: calc(var(--env-w) * 0.64);
+  opacity: 0; /* shown by the timeline */
+  will-change: transform;
+}
+.env-back,
+.env-pocket,
+.flap-face {
+  position: absolute;
+  border-radius: 18px;
+}
+.env-back {
+  inset: 0;
+  background: linear-gradient(160deg, #f8e9f0 0%, #f6f3f6 55%, #e7effd 100%);
+  border: 1px solid #fff;
+}
+.letter {
+  position: absolute;
+  left: 6%;
+  width: 88%;
+  bottom: 5%;
+  height: 90%;
+  z-index: 2;
+}
+.letter-paper {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fffefd 0%, #fffaf8 100%);
+  border: 1px solid #fff;
+  box-shadow: 0 6px 24px rgba(111, 168, 245, 0.14);
+  display: flex;
+  justify-content: center;
+}
+.letter-label {
+  margin-top: 9%;
+  opacity: 0.7;
+  font-size: clamp(9px, 1.8vw, 11px);
+}
+.env-pocket {
+  inset: 0;
+  z-index: 3;
+  /* Sides and bottom of the envelope, with the V-shaped opening at the top. */
+  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+  background:
+    linear-gradient(135deg, rgba(255, 211, 228, 0.42) 0%, rgba(255, 253, 251, 0) 48%, rgba(207, 227, 255, 0.45) 100%),
+    #fffdfb;
+  border: 1px solid #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+.env-folds {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.env-flap {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 58%;
+  z-index: 4;
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+}
+.flap-face {
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 18px 18px 0 0;
+}
+.flap-front {
+  background:
+    linear-gradient(180deg, rgba(255, 211, 228, 0.32) 0%, rgba(255, 253, 251, 0) 70%),
+    linear-gradient(90deg, rgba(207, 227, 255, 0.25), rgba(255, 253, 251, 0) 50%, rgba(255, 211, 228, 0.25)),
+    #fffdfb;
+  filter: drop-shadow(0 2px 3px rgba(111, 168, 245, 0.18));
+}
+.flap-inside {
+  transform: rotateX(180deg);
+  background: linear-gradient(0deg, #f3e3ec 0%, #eef1fb 100%);
+}
+.env-seal {
+  position: absolute;
+  left: 50%;
+  top: 74%;
+  width: clamp(40px, 10.5vw, 56px);
+  aspect-ratio: 48 / 44;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 3px 5px rgba(224, 115, 156, 0.35));
+}
+.env-shadow {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + min(520px, 82vw) * 0.32 + 18px);
+  width: calc(min(520px, 82vw) * 0.85);
+  height: 34px;
+  margin-left: calc(min(520px, 82vw) * -0.425);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(91, 96, 120, 0.22), rgba(111, 168, 245, 0.08) 60%, transparent);
+  filter: blur(8px);
+}
+.intro-name,
+.intro-heart {
+  position: absolute;
+  opacity: 0;
+  white-space: nowrap;
+}
+.intro-name {
+  /* Same type as the hero heading; size is copied from it at runtime. */
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: normal;
+  font-variation-settings: 'SOFT' 100, 'WONK' 0;
+}
+.burst-bit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(111, 168, 245, 0.45));
+}
+.intro-skip {
+  position: absolute;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  opacity: 0.45;
+  border-radius: 999px;
+  transition: opacity 0.25s ease;
+  cursor: pointer;
+}
+.intro-skip:hover,
+.intro-skip:focus-visible { opacity: 0.9; }
+.intro-skip:focus-visible { outline: 2px solid var(--color-rose); outline-offset: 2px; }
+
 /* Hidden until GSAP reveals it (only when motion is allowed). */
 .js-motion [data-reveal] { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .field, .bounce-soft { animation: none; }
   .lightbox, .lightbox .lightbox-panel { transition: none; }
+  [data-late], .cube-canvas { transition-duration: 0.6s; }
   .floating-heart { display: none; }
 }

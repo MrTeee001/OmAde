@@ -6,13 +6,14 @@ import { Counter } from './Counter'
 import { Heart } from './Heart'
 import { Lightbox } from './Lightbox'
 import { createStage, PHASES } from './cube/stage'
+import { heroReady, markHeroReady } from '../lib/ready'
 
 // The 3D code is loaded separately so the text appears straight away.
 const CubeCanvas = lazy(() => import('./cube/CubeCanvas'))
 
-type Props = { withCube: boolean; lite: boolean }
+type Props = { withCube: boolean; lite: boolean; intro: boolean }
 
-export function Hero({ withCube, lite }: Props) {
+export function Hero({ withCube, lite, intro }: Props) {
   const { names, hero, startDate, cube } = memories
   const items = cube.slice(0, 6)
 
@@ -24,10 +25,16 @@ export function Hero({ withCube, lite }: Props) {
   const [ready, setReady] = useState(false)
   const [active, setActive] = useState(true)
   const [open, setOpen] = useState<number | null>(null)
+  // Once the cube has warmed up, stop drawing it while the opening plays over it.
+  const [warm, setWarm] = useState(false)
+  useEffect(() => void heroReady.then(() => setWarm(true)), [])
 
   // Pin the hero and drive the cube → cards story with the scroll.
   useEffect(() => {
-    if (!withCube) return
+    if (!withCube) {
+      markHeroReady() // nothing heavy to wait for
+      return
+    }
     const section = sectionRef.current!
     const grid = gridRef.current!
     setReady(true)
@@ -81,20 +88,29 @@ export function Hero({ withCube, lite }: Props) {
         }`}
       >
         <div ref={textRef}>
-          <p className="label" data-reveal>
+          <p className="label" data-intro-fade>
             {hero.label}
           </p>
 
-          <h1 id="hero-title" className="heading mt-6 text-ink" data-reveal data-reveal-delay="0.08">
-            <span className="italic">{names.first}</span> <span className="italic text-rose">&amp;</span>{' '}
-            <span className="italic">{names.second}</span>
+          {/* The opening sequence lands its names exactly on these three spans. */}
+          <h1 id="hero-title" className="heading mt-6 text-ink" data-intro-target>
+            <span className="italic" data-name="first">
+              {names.first}
+            </span>{' '}
+            <span className="italic text-rose" data-name="amp">
+              &amp;
+            </span>{' '}
+            <span className="italic" data-name="second">
+              {names.second}
+            </span>
           </h1>
 
-          <p className="mt-6 max-w-[34ch] text-ink-soft" data-reveal data-reveal-delay="0.16">
+          <p className="mt-6 max-w-[34ch] text-ink-soft" data-intro-fade>
             {hero.line}
           </p>
 
-          <div className="mt-10 md:mt-16" data-reveal data-reveal-delay="0.24">
+          {/* data-late: fades in once the opening sequence has finished. */}
+          <div className="mt-10 md:mt-16" data-late>
             <Counter startDate={startDate} />
           </div>
         </div>
@@ -115,9 +131,11 @@ export function Hero({ withCube, lite }: Props) {
         className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink md:bottom-8"
         aria-label="Scroll down"
       >
-        <span className="label">Scroll</span>
-        <span className="bounce-soft text-rose">
-          <Heart size={16} />
+        <span data-late className="flex flex-col items-center gap-2">
+          <span className="label">Scroll</span>
+          <span className="bounce-soft text-rose">
+            <Heart size={16} />
+          </span>
         </span>
       </a>
 
@@ -149,7 +167,7 @@ export function Hero({ withCube, lite }: Props) {
 
           {ready && (
             <Suspense fallback={null}>
-              <CubeCanvas stage={stage} active={active} lite={lite} />
+              <CubeCanvas stage={stage} active={active && !(intro && warm)} lite={lite} />
             </Suspense>
           )}
           <Lightbox items={items} index={open} onClose={() => setOpen(null)} onChange={setOpen} />
