@@ -6,7 +6,7 @@ import { Background } from './components/Background'
 import { FloatingHearts } from './components/FloatingHearts'
 import { Hero } from './components/Hero'
 import { Intro } from './components/Intro'
-import { Story } from './components/sections/Story'
+import { Memories } from './components/sections/Memories'
 import { LittleThings } from './components/sections/LittleThings'
 import { Reel } from './components/sections/Reel'
 import { Letters } from './components/sections/Letters'
@@ -98,7 +98,7 @@ export default function App() {
         <Hero withCube={withCube} lite={lite} intro={intro} />
         {!withCube && <CubeGrid />}
 
-        <Story />
+        <Memories />
         <LittleThings />
         <Reel />
         <Letters />

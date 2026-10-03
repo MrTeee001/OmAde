@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { memories } from '../memories'
+import { cubeFaces } from '../lib/order'
 import { Counter } from './Counter'
 import { Heart } from './Heart'
 import { Lightbox } from './Lightbox'
@@ -15,8 +16,8 @@ const CubeCanvas = lazy(() => import('./cube/CubeCanvas'))
 type Props = { withCube: boolean; lite: boolean; intro: boolean }
 
 export function Hero({ withCube, lite, intro }: Props) {
-  const { names, hero, startDate, cube } = memories
-  const items = cube.slice(0, 6)
+  const { names, hero, startDate } = memories
+  const items = cubeFaces // shuffled on every load, captions travel with their photos
 
   const sectionRef = useRef<HTMLElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
@@ -182,7 +183,7 @@ export function Hero({ withCube, lite, intro }: Props) {
 
       <a
         ref={hintRef}
-        href="#story"
+        href="#memories"
         className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink md:bottom-8"
         aria-label="Scroll down"
       >

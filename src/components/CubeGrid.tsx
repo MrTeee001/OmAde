@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { memories } from '../memories'
+import { cubeFaces } from '../lib/order'
 import { MediaTile } from './MediaTile'
 import { Lightbox } from './Lightbox'
 
 /** The six cube photos as a simple grid, for visitors who prefer less motion. */
 export function CubeGrid() {
-  const items = memories.cube.slice(0, 6)
+  const items = cubeFaces
   const [open, setOpen] = useState<number | null>(null)
 
   return (

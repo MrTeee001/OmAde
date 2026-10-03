@@ -10,7 +10,7 @@ export type MediaInfo = {
 
 const url = (file: string) => `${import.meta.env.BASE_URL}memories/${file}`
 
-/** Finds the file for a media name like 'story-01' in public/memories/. */
+/** Finds the file for a media name like 'memory-01' in public/memories/. */
 export function getMedia(name: string): MediaInfo {
   const file = manifest[name.toLowerCase()]
   const posterFile = manifest[`${name.toLowerCase()}-poster`]

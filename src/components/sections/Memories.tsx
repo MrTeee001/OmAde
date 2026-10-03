@@ -1,17 +1,19 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { memories } from '../../memories'
+import { memoryFrames } from '../../lib/order'
 import { prefersReducedMotion } from '../../lib/motion'
 import { Heart } from '../Heart'
 import { MediaTile } from '../MediaTile'
 import { SectionHeading } from './SectionHeading'
 
 /**
- * Our story: a line down the middle draws itself as you scroll, with a little
- * heart riding its tip. Entries alternate left and right (stacked on mobile);
- * each photo starts tilted like a printed snapshot and straightens into place.
+ * Our memories: frame after frame of photos (or short videos), in a fresh
+ * random order on every visit. A line down the middle draws itself as you
+ * scroll, with a little heart riding its tip. Frames alternate left and right
+ * (stacked on mobile); each starts tilted like a printed snapshot and
+ * straightens into place.
  */
-export function Story() {
+export function Memories() {
   const rootRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLOListElement>(null)
 
@@ -39,7 +41,7 @@ export function Story() {
         },
       )
 
-      // Each entry: photo straightens and rises, text fades up.
+      // Each frame straightens and rises into place.
       gsap.utils.toArray<HTMLElement>('[data-story-entry]').forEach((entry) => {
         const tilt = Number(entry.dataset.tilt)
         const tl = gsap.timeline({ scrollTrigger: { trigger: entry, start: 'top 82%', once: true } })
@@ -48,12 +50,6 @@ export function Story() {
           { rotation: tilt, y: 60, opacity: 0 },
           { rotation: 0, y: 0, opacity: 1, duration: 1.1, ease: 'power3.out' },
         )
-          .fromTo(
-            entry.querySelectorAll('[data-story-text] > *'),
-            { y: 20, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.08 },
-            0.25,
-          )
           .fromTo(entry.querySelector('[data-story-dot]'), { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(2)' }, 0.1)
       })
     }, rootRef.current!) // the line, heart and entries all live inside this box
@@ -61,9 +57,9 @@ export function Story() {
   }, [])
 
   return (
-    <section id="story" className="section-gap" aria-labelledby="story-title">
+    <section id="memories" className="section-gap" aria-labelledby="memories-title">
       <div className="shell">
-        <SectionHeading id="story-title">How we got here</SectionHeading>
+        <SectionHeading id="memories-title">Our memories</SectionHeading>
 
         <div ref={rootRef} className="story relative mt-16 md:mt-24">
           {/* The line (faint track + the part that draws) and the travelling heart. */}
@@ -75,20 +71,15 @@ export function Story() {
           </div>
 
           <ol ref={listRef} className="story-list">
-            {memories.timeline.map((entry, i) => {
+            {memoryFrames.map((name, i) => {
               const side = i % 2 === 0 ? 'left' : 'right'
               // Printed-photo tilt: 2–3°, alternating direction.
               const tilt = (i % 2 === 0 ? -1 : 1) * (2 + (i % 3) * 0.5)
               return (
-                <li key={entry.media} data-story-entry data-tilt={tilt} className={`story-entry story-entry-${side}`}>
+                <li key={name} data-story-entry data-tilt={tilt} className={`story-entry story-entry-${side}`}>
                   <span data-story-dot className="story-dot" aria-hidden="true" />
                   <div data-story-photo className="story-photo">
-                    <MediaTile name={entry.media} alt={entry.title} className="aspect-[4/5] w-full" />
-                  </div>
-                  <div data-story-text className="mt-6">
-                    <p className="label">{entry.date}</p>
-                    <h3 className="mt-2 font-display text-[28px] leading-tight text-ink md:text-[32px]">{entry.title}</h3>
-                    <p className="mt-3 max-w-[42ch] text-ink-soft">{entry.caption}</p>
+                    <MediaTile name={name} alt={`A memory (${i + 1} of ${memoryFrames.length})`} className="aspect-[4/5] w-full border border-white shadow-[0_8px_30px_rgba(111,168,245,0.12)]" />
                   </div>
                 </li>
               )

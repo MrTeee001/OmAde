@@ -9,11 +9,12 @@ Open `src/memories.ts` and edit the text between the quotes.
 Drop files into `public/memories/` using these names (any of `.jpg`, `.png`, `.webp`, `.mp4`):
 
 - `cube-1` … `cube-6`
-- `story-01` … `story-20`
+- `memory-01` … `memory-20`
 - `reel-1` … `reel-4`
 - `closing`
 
 Missing files show a soft placeholder tile, so the site always works.
+The cube photos, memory frames and reel clips are shuffled into a new order on every visit.
 
 ## Running it on a computer
 Needs [Node.js](https://nodejs.org) 20 or newer.

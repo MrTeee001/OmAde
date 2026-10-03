@@ -272,7 +272,7 @@
   font-variation-settings: 'SOFT' 100, 'WONK' 0;
 }
 
-/* ── Our story ───────────────────────────────────────────── */
+/* ── Our memories (frames down a drawing line) ───────────────────────────────────────────── */
 .story-track {
   position: absolute;
   top: 0;
@@ -328,7 +328,9 @@
     width: calc(50% - 56px);
     padding-left: 0;
   }
-  .story-entry + .story-entry { margin-top: -220px; }
+  /* Each frame starts half a frame (plus a small gap) below the previous one, on the
+     other side, so same-side frames never touch. Frame height = width × 5/4. */
+  .story-entry + .story-entry { margin-top: calc((50% - 56px) * -0.625 + 32px); }
   .story-entry-right { margin-left: auto; }
   .story-entry-left .story-dot { left: auto; right: -63px; }
   .story-entry-right .story-dot { left: -63px; }

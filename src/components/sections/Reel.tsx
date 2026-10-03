@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import { memories } from '../../memories'
+import { reelClips } from '../../lib/order'
 import { getMedia } from '../../lib/media'
 import { prefersReducedMotion } from '../../lib/motion'
 import { MediaTile } from '../MediaTile'
@@ -49,7 +49,7 @@ export function Reel() {
           <SectionHeading id="reel-title">Moving pictures</SectionHeading>
         </div>
         <ul ref={rowRef} className={`reel-row mt-12 md:mt-16 ${reduced ? 'reel-row-scroll' : ''}`}>
-          {memories.reels.map((name, i) => {
+          {reelClips.map((name, i) => {
             const isVideo = getMedia(name).kind === 'video'
             const on = sound === i
             return (

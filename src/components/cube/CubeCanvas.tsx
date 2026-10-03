@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { PerformanceMonitor, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
-import { memories } from '../../memories'
+import { cubeFaces } from '../../lib/order'
 import { createFaceMaterial } from './faceMaterial'
 import { createFaceTexture } from './textures'
 import { PHASES, type Stage } from './stage'
@@ -78,7 +78,7 @@ function Scene({ stage, active, lite }: Props) {
 
   // One material + texture per face.
   const faces = useMemo(
-    () => memories.cube.slice(0, 6).map(() => ({ material: createFaceMaterial(new THREE.Texture()) })),
+    () => cubeFaces.map(() => ({ material: createFaceMaterial(new THREE.Texture()) })),
     [],
   )
   const videos = useRef<(HTMLVideoElement | null)[]>([])
@@ -86,7 +86,7 @@ function Scene({ stage, active, lite }: Props) {
   const [texSize] = useState(lite ? 512 : 1024)
 
   useEffect(() => {
-    const loaded = memories.cube.slice(0, 6).map((item, i) => {
+    const loaded = cubeFaces.map((item, i) => {
       const apply = (f: ReturnType<typeof createFaceTexture>) => {
         faces[i].material.uniforms.uMap.value = f.texture
         faces[i].material.uniforms.uUvScale.value = f.uvScale

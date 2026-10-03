@@ -5,7 +5,7 @@
  *
  *  Photos and videos go in the folder  public/memories/
  *  using the names written next to each item below
- *  (for example story-01.jpg or reel-2.mp4).
+ *  (for example memory-01.jpg or reel-2.mp4).
  *  Allowed types: .jpg  .png  .webp  .mp4
  *  If a file is missing, a soft placeholder tile is shown instead.
  * ─────────────────────────────────────────────────────────────
@@ -39,29 +39,30 @@ export const memories = {
     { media: 'cube-6', caption: '[Placeholder] Cube caption six' },
   ],
 
-  // ── Our story: the timeline (files story-01 … story-20) ──
-  // date: any text you like, e.g. '29 May 2026'
-  timeline: [
-    { date: '[Date 01]', title: '[Title 01]', caption: '[Placeholder] What happened on this day.', media: 'story-01' },
-    { date: '[Date 02]', title: '[Title 02]', caption: '[Placeholder] What happened on this day.', media: 'story-02' },
-    { date: '[Date 03]', title: '[Title 03]', caption: '[Placeholder] What happened on this day.', media: 'story-03' },
-    { date: '[Date 04]', title: '[Title 04]', caption: '[Placeholder] What happened on this day.', media: 'story-04' },
-    { date: '[Date 05]', title: '[Title 05]', caption: '[Placeholder] What happened on this day.', media: 'story-05' },
-    { date: '[Date 06]', title: '[Title 06]', caption: '[Placeholder] What happened on this day.', media: 'story-06' },
-    { date: '[Date 07]', title: '[Title 07]', caption: '[Placeholder] What happened on this day.', media: 'story-07' },
-    { date: '[Date 08]', title: '[Title 08]', caption: '[Placeholder] What happened on this day.', media: 'story-08' },
-    { date: '[Date 09]', title: '[Title 09]', caption: '[Placeholder] What happened on this day.', media: 'story-09' },
-    { date: '[Date 10]', title: '[Title 10]', caption: '[Placeholder] What happened on this day.', media: 'story-10' },
-    { date: '[Date 11]', title: '[Title 11]', caption: '[Placeholder] What happened on this day.', media: 'story-11' },
-    { date: '[Date 12]', title: '[Title 12]', caption: '[Placeholder] What happened on this day.', media: 'story-12' },
-    { date: '[Date 13]', title: '[Title 13]', caption: '[Placeholder] What happened on this day.', media: 'story-13' },
-    { date: '[Date 14]', title: '[Title 14]', caption: '[Placeholder] What happened on this day.', media: 'story-14' },
-    { date: '[Date 15]', title: '[Title 15]', caption: '[Placeholder] What happened on this day.', media: 'story-15' },
-    { date: '[Date 16]', title: '[Title 16]', caption: '[Placeholder] What happened on this day.', media: 'story-16' },
-    { date: '[Date 17]', title: '[Title 17]', caption: '[Placeholder] What happened on this day.', media: 'story-17' },
-    { date: '[Date 18]', title: '[Title 18]', caption: '[Placeholder] What happened on this day.', media: 'story-18' },
-    { date: '[Date 19]', title: '[Title 19]', caption: '[Placeholder] What happened on this day.', media: 'story-19' },
-    { date: '[Date 20]', title: '[Title 20]', caption: '[Placeholder] What happened on this day.', media: 'story-20' },
+  // ── Our memories: the frames you scroll past (files memory-01 … memory-20) ──
+  // Each frame is one photo or short video. Their order is shuffled on
+  // every visit. To add more frames, add more names here (memory-21 …).
+  memoryFrames: [
+    'memory-01',
+    'memory-02',
+    'memory-03',
+    'memory-04',
+    'memory-05',
+    'memory-06',
+    'memory-07',
+    'memory-08',
+    'memory-09',
+    'memory-10',
+    'memory-11',
+    'memory-12',
+    'memory-13',
+    'memory-14',
+    'memory-15',
+    'memory-16',
+    'memory-17',
+    'memory-18',
+    'memory-19',
+    'memory-20',
   ],
 
   // ── Moving pictures: short clips (files reel-1 … reel-4) ──
