@@ -5,8 +5,9 @@ import { memories } from '../memories'
 import { Counter } from './Counter'
 import { Heart } from './Heart'
 import { Lightbox } from './Lightbox'
-import { createStage, PHASES } from './cube/stage'
+import { createStage, OPEN_DURATION, PHASES } from './cube/stage'
 import { heroReady, markHeroReady } from '../lib/ready'
+import { glideTo } from '../lib/scroll'
 
 // The 3D code is loaded separately so the text appears straight away.
 const CubeCanvas = lazy(() => import('./cube/CubeCanvas'))
@@ -21,7 +22,10 @@ export function Hero({ withCube, lite, intro }: Props) {
   const textRef = useRef<HTMLDivElement>(null)
   const hintRef = useRef<HTMLAnchorElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
+  const tapRef = useRef<HTMLDivElement>(null)
+  const stRef = useRef<ScrollTrigger | null>(null)
   const stage = useRef(createStage()).current
+  const [cubeHover, setCubeHover] = useState(false)
   const [ready, setReady] = useState(false)
   const [active, setActive] = useState(true)
   const [open, setOpen] = useState<number | null>(null)
@@ -47,8 +51,7 @@ export function Hero({ withCube, lite, intro }: Props) {
           start: 'top top',
           end: () => `+=${Math.round(window.innerHeight * 2.6)}`,
           pin: true,
-          scrub: 0.9,
-          anticipatePin: 1,
+          scrub: 0.4,
           invalidateOnRefresh: true,
         },
         onUpdate: () => {
@@ -56,12 +59,15 @@ export function Hero({ withCube, lite, intro }: Props) {
           grid.classList.toggle('is-live', stage.progress > 0.97)
         },
       })
-      tl.to(textRef.current, { opacity: 0, y: -24, duration: 0.16 }, 0)
-        .to(hintRef.current, { opacity: 0, duration: 0.06 }, 0)
+      stRef.current = tl.scrollTrigger ?? null
+      // The rest of the hero dims softly while the cube takes the stage.
+      tl.to(textRef.current, { opacity: 0.1, duration: 0.22, ease: 'sine.inOut' }, 0)
+        .to([hintRef.current, tapRef.current], { opacity: 0, duration: 0.06 }, 0)
+        // Captions fade in under the cards, one after another.
         .fromTo(
           grid.querySelectorAll('[data-caption]'),
           { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.07, stagger: 0.01 },
+          { opacity: 1, y: 0, duration: 0.06, stagger: 0.025 },
           PHASES.captions,
         )
         .set({}, {}, 1) // the timeline always spans exactly 0 → 1
@@ -78,8 +84,31 @@ export function Hero({ withCube, lite, intro }: Props) {
     return () => {
       io.disconnect()
       ctx.revert()
+      stRef.current = null
     }
   }, [withCube, stage])
+
+  // Clicking the cube and scrolling share one timeline: a click simply glides the
+  // page to the end of it (or back to the start), so both always end up the same.
+  const openMemories = () => {
+    const st = stRef.current
+    if (st && stage.progress < 0.5) glideTo(st.end, OPEN_DURATION)
+  }
+  const closeMemories = () => {
+    const st = stRef.current
+    if (st) glideTo(st.start, OPEN_DURATION)
+  }
+
+  // Escape closes the opened memories (the lightbox handles its own Escape first).
+  useEffect(() => {
+    if (!withCube) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || open !== null || !active || stage.progress < 0.5) return
+      closeMemories()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
 
   return (
     <section ref={sectionRef} className="relative flex min-h-svh flex-col overflow-hidden" aria-labelledby="hero-title">
@@ -117,12 +146,37 @@ export function Hero({ withCube, lite, intro }: Props) {
         </div>
 
         {withCube && (
-          // Where the cube rests. Drag it with a finger (or mouse) to turn it.
+          // Where the cube rests (it is drawn by the 3D layer on top of this box).
+          // Click or tap to open; a sideways drag just gives it a spin.
           <div
             ref={(el) => void (stage.slot = el)}
-            aria-hidden="true"
+            role="button"
+            tabIndex={0}
+            aria-label="Open our memories"
             className="cube-slot relative mx-auto aspect-square w-[240px] max-w-full md:w-[380px]"
-          />
+            onClick={() => !stage.dragged && openMemories()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                openMemories()
+              }
+            }}
+            onPointerEnter={(e) => {
+              if (e.pointerType !== 'mouse') return
+              stage.hoverCube = true
+              setCubeHover(true)
+            }}
+            onPointerLeave={() => {
+              stage.hoverCube = false
+              setCubeHover(false)
+            }}
+          >
+            <div ref={tapRef} className="cube-tap" aria-hidden="true">
+              <span data-late className={`cube-tap-label label ${cubeHover ? 'is-shown' : ''}`}>
+                Tap to open
+              </span>
+            </div>
+          </div>
         )}
       </div>
 
@@ -144,6 +198,10 @@ export function Hero({ withCube, lite, intro }: Props) {
         <>
           {/* The grid the faces settle into. The 3D cards are drawn on top of these spots. */}
           <div ref={gridRef} className="cube-grid absolute inset-0 flex items-center justify-center px-6">
+            {/* Plays the opening in reverse: cards fold back into the cube. */}
+            <button type="button" className="pill-button cube-close" onClick={closeMemories}>
+              <span className="label !text-ink">Close</span>
+            </button>
             <ul className="cube-grid-list grid">
               {items.map((item, i) => (
                 <li key={item.media} className="flex flex-col items-center">

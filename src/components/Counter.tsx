@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { elapsedSince, lagosMidnight } from '../lib/time'
+import { elapsedInLagos } from '../lib/time'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/** "Together for X days", ticking live from the start date (midnight, Lagos time). */
+/** "Together for X days", ticking live on Nigerian time from midnight (Lagos) on the start date. */
 export function Counter({ startDate }: { startDate: string }) {
-  const start = lagosMidnight(startDate)
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -19,7 +18,7 @@ export function Counter({ startDate }: { startDate: string }) {
     return () => clearTimeout(timer)
   }, [])
 
-  const { days, hours, minutes, seconds } = elapsedSince(start, now)
+  const { days, hours, minutes, seconds } = elapsedInLagos(startDate, now)
   const units = [
     { value: hours, label: hours === 1 ? 'hour' : 'hours' },
     { value: minutes, label: minutes === 1 ? 'minute' : 'minutes' },

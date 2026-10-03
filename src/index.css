@@ -141,10 +141,45 @@
 
 /* ── Cube stage ───────────────────────────────────────────── */
 .cube-slot {
-  cursor: grab;
-  touch-action: pan-y; /* sideways drags turn the cube, up/down still scrolls */
+  cursor: pointer;
+  touch-action: pan-y; /* sideways drags spin the cube, up/down still scrolls */
+  border-radius: 24px;
+  outline: none;
 }
-.cube-slot:active { cursor: grabbing; }
+.cube-slot:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-rose); }
+/* "Tap to open": fades in on hover; always softly shown on touch screens. */
+.cube-tap {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  .cube-tap { top: calc(100% + 18px); }
+}
+.cube-tap-label {
+  display: block;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.cube-tap-label.is-shown,
+.cube-slot:focus-visible .cube-tap-label { opacity: 1; transform: none; }
+@media (hover: none) {
+  .cube-tap-label { opacity: 0.75; transform: none; }
+}
+.intro .cube-tap-label { opacity: 0; }
+.cube-close {
+  position: absolute;
+  top: max(20px, env(safe-area-inset-top));
+  right: 20px;
+  z-index: 25; /* above the 3D layer */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cube-grid.is-live .cube-close { opacity: 1; }
 
 /* Card size: 3×2 on desktop, 2×3 on mobile, always fitting one screen. */
 .cube-grid-list {
@@ -240,90 +275,56 @@
 .intro [data-late],
 .intro .cube-canvas { opacity: 0; }
 
+/* The camera: everything inside is drawn in real 3D perspective. */
+.intro-camera {
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+}
+.intro-world {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
 .envelope {
   --env-w: min(520px, 82vw);
   position: relative;
   width: var(--env-w);
   height: calc(var(--env-w) * 0.64);
+  transform-style: preserve-3d;
   opacity: 0; /* shown by the timeline */
-  will-change: transform;
-}
-.env-back,
-.env-pocket,
-.flap-face {
-  position: absolute;
-  border-radius: 18px;
 }
 .env-back {
-  inset: 0;
-  background: linear-gradient(160deg, #f8e9f0 0%, #f6f3f6 55%, #e7effd 100%);
-  border: 1px solid #fff;
-}
-.letter {
-  position: absolute;
-  left: 6%;
-  width: 88%;
-  bottom: 5%;
-  height: 90%;
-  z-index: 2;
-}
-.letter-paper {
   position: absolute;
   inset: 0;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #fffefd 0%, #fffaf8 100%);
+  border-radius: 16px;
+  /* The inside of the envelope: what the camera flies into. */
+  background: linear-gradient(160deg, #f8e9f0 0%, #fbf7f9 55%, #e7effd 100%);
   border: 1px solid #fff;
-  box-shadow: 0 6px 24px rgba(111, 168, 245, 0.14);
-  display: flex;
-  justify-content: center;
+  box-shadow: 0 10px 30px rgba(111, 168, 245, 0.12);
 }
-.letter-label {
-  margin-top: 9%;
-  opacity: 0.7;
-  font-size: clamp(9px, 1.8vw, 11px);
-}
-.env-pocket {
+.env-panel {
+  position: absolute;
   inset: 0;
-  z-index: 3;
-  /* Sides and bottom of the envelope, with the V-shaped opening at the top. */
-  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
-  background:
-    linear-gradient(135deg, rgba(255, 211, 228, 0.42) 0%, rgba(255, 253, 251, 0) 48%, rgba(207, 227, 255, 0.45) 100%),
-    #fffdfb;
-  border: 1px solid #fff;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+  transform-style: preserve-3d;
 }
-.env-folds {
+/* Each flap hinges on its outer edge, and sits a hair in front of the one below. */
+.env-panel-bottom { transform-origin: 50% 100%; transform: translateZ(1px); }
+.env-panel-left { transform-origin: 0 50%; transform: translateZ(2px); }
+.env-panel-right { transform-origin: 100% 50%; transform: translateZ(2px); }
+.env-panel-top {
+  inset: 0 0 auto 0;
+  height: 58%;
+  transform-origin: 50% 0;
+  transform: translateZ(3px);
+}
+.panel-face {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-}
-.env-flap {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 58%;
-  z-index: 4;
-  transform-origin: 50% 0;
-  transform-style: preserve-3d;
-}
-.flap-face {
-  inset: 0;
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  overflow: visible;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border-radius: 18px 18px 0 0;
-}
-.flap-front {
-  background:
-    linear-gradient(180deg, rgba(255, 211, 228, 0.32) 0%, rgba(255, 253, 251, 0) 70%),
-    linear-gradient(90deg, rgba(207, 227, 255, 0.25), rgba(255, 253, 251, 0) 50%, rgba(255, 211, 228, 0.25)),
-    #fffdfb;
-  filter: drop-shadow(0 2px 3px rgba(111, 168, 245, 0.18));
-}
-.flap-inside {
-  transform: rotateX(180deg);
-  background: linear-gradient(0deg, #f3e3ec 0%, #eef1fb 100%);
 }
 .env-seal {
   position: absolute;
@@ -331,19 +332,21 @@
   top: 74%;
   width: clamp(40px, 10.5vw, 56px);
   aspect-ratio: 48 / 44;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) translateZ(1px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   filter: drop-shadow(0 3px 5px rgba(224, 115, 156, 0.35));
 }
 .env-shadow {
   position: absolute;
-  left: 50%;
-  top: calc(50% + min(520px, 82vw) * 0.32 + 18px);
-  width: calc(min(520px, 82vw) * 0.85);
+  left: 7.5%;
+  width: 85%;
+  top: calc(100% + 18px);
   height: 34px;
-  margin-left: calc(min(520px, 82vw) * -0.425);
   border-radius: 50%;
   background: radial-gradient(closest-side, rgba(91, 96, 120, 0.22), rgba(111, 168, 245, 0.08) 60%, transparent);
   filter: blur(8px);
+  transform: translateZ(-2px);
 }
 .intro-name,
 .intro-heart {

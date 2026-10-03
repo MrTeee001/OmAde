@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { memories } from '../memories'
@@ -8,15 +8,16 @@ import { pauseScroll, resumeScroll } from '../lib/scroll'
 import { heroReady } from '../lib/ready'
 
 /**
- * The opening: an envelope rises, opens, a letter slides out with the
- * names, then the camera pushes into the letter and the names land exactly
- * on the hero heading. Plays on every load (nothing is saved to skip it).
+ * The opening: an envelope rises and opens, the names pop up out of it with a
+ * heart between them, then the envelope opens toward the camera and the camera
+ * flies inside it, coming out on the hero with the names landing exactly on
+ * the heading. Plays on every load (nothing is saved to skip it).
  *
- *   0.0 – 1.2s  envelope rises and settles
- *   1.2 – 2.4s  seal pulses, flap opens in 3D, letter slides out
- *   2.4 – 3.8s  names pop in, heart beats twice, sparkle burst
- *   3.8 – 4.3s  hold
- *   4.3 – 5.5s  push into the letter, names travel into the hero heading
+ *   0.0 – 1.2s   envelope rises and settles
+ *   1.2 – 2.4s   seal pulses, top flap folds open in 3D
+ *   2.4 – 3.8s   names pop up, heart beats twice, sparkle burst
+ *   3.8 – 4.3s   hold
+ *   4.3 – 5.75s  flaps open toward the camera, camera flies into the envelope
  */
 
 const COLORS = ['#F58FB5', '#6FA8F5', '#FFFFFF']
@@ -154,73 +155,82 @@ export function Intro({ onDone }: { onDone: () => void }) {
         }
 
         const small = window.innerWidth < 768
+        const world = q('[data-world]')[0] as HTMLElement
         const envelope = q('[data-envelope]')[0] as HTMLElement
-        const letter = q('[data-letter]')[0] as HTMLElement
-        const flap = q('[data-flap]')[0] as HTMLElement
+        const topFlap = q('[data-panel="top"]')[0] as HTMLElement
+        const shadow = q('[data-env-shadow]')[0] as HTMLElement
 
-        // Measure where the letter ends up once it has slid out (envelope at rest).
-        gsap.set(letter, { yPercent: -66 })
-        const lr = letter.getBoundingClientRect()
-        gsap.set(letter, { yPercent: 0 })
+        // Where the envelope sits at rest (before it is moved off screen).
+        const er = envelope.getBoundingClientRect()
 
-        // The names on the letter: the hero line, shrunk and centred on the paper.
+        // The names pop up just above the envelope's opening: the hero line,
+        // shrunk to fit, centred over the envelope.
         const lineLeft = rects.first.left
         const lineRight = rects.second.right
         const lineTop = Math.min(rects.first.top, rects.second.top)
         const lineBottom = Math.max(rects.first.bottom, rects.second.bottom)
         const lineW = lineRight - lineLeft
         const lineH = lineBottom - lineTop
-        const s = Math.min((lr.width * 0.74) / lineW, 1)
-        const cx = lr.left + lr.width / 2
-        const cy = lr.top + lr.height * 0.36
-        const onLetter = { x: cx - (lineLeft + lineW / 2) * s, y: cy - (lineTop + lineH / 2) * s, scale: s }
+        const s = Math.min((er.width * 0.8) / lineW, 1)
+        const cx = er.left + er.width / 2
+        const cy = er.top - er.height * 0.06 // just above the opening, over the open flap
+        const onEnvelope = { x: cx - (lineLeft + lineW / 2) * s, y: cy - (lineTop + lineH / 2) * s, scale: s }
 
-        gsap.set(group, { ...onLetter, transformOrigin: '0 0' })
-        gsap.set([parts.first, parts.second], { opacity: 0, scale: 0.6, y: 10, transformOrigin: '50% 60%' })
-        gsap.set(parts.heart, { opacity: 0, scale: 0 })
+        gsap.set(group, { ...onEnvelope, transformOrigin: '0 0' })
+        // Each name starts low, inside the envelope, ready to spring up.
+        gsap.set([parts.first, parts.second], { opacity: 0, scale: 0.5, y: lineH * 0.9, transformOrigin: '50% 80%' })
+        gsap.set(parts.heart, { opacity: 0, scale: 0, y: lineH * 0.6 })
         gsap.set(parts.amp, { opacity: 0 })
-        gsap.set(envelope, { y: () => window.innerHeight * 0.75, rotation: -7, opacity: 1 })
-        gsap.set(q('[data-env-shadow]'), { opacity: 0, scaleX: 0.6 })
-        gsap.set(q('[data-stage]'), { transformOrigin: `${cx}px ${cy}px` })
+        gsap.set(envelope, { y: () => window.innerHeight * 0.75, rotation: -7, rotationX: 18, opacity: 1 })
+        gsap.set(shadow, { opacity: 0, scaleX: 0.6 })
+        gsap.set(world, { z: 0, rotationX: 0 })
 
         // While developing, '?intro-pause' holds the timeline so it can be stepped through.
         const hold = import.meta.env.DEV && location.search.includes('intro-pause')
         const tl = gsap.timeline({ onComplete: finish, paused: hold })
         tlRef.current = tl
 
-        // 1. Arrival
+        // 1. Arrival: rises from below, tilt settles straight
         tl.to(envelope, { y: 0, duration: 1.2, ease: 'power3.inOut' }, 0)
-          .to(envelope, { rotation: 0, duration: 1.15, ease: 'back.out(1.4)' }, 0.1)
-          .to(q('[data-env-shadow]'), { opacity: 1, scaleX: 1, duration: 1.0, ease: 'sine.inOut' }, 0.25)
+          .to(envelope, { rotation: 0, rotationX: 0, duration: 1.15, ease: 'back.out(1.4)' }, 0.1)
+          .to(shadow, { opacity: 1, scaleX: 1, duration: 1.0, ease: 'sine.inOut' }, 0.25)
 
-        // 2. Opening: seal pulse, flap folds up (hinged at the top), letter slides out
+        // 2. Opening: seal pulse, then the top flap folds up toward the camera on its hinge
         tl.to(q('[data-seal]'), { scale: 1.14, duration: 0.14, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 1.2)
-          .to(flap, { rotationX: -180, transformPerspective: 900, duration: 0.6, ease: 'power2.inOut' }, 1.45)
-          .set(flap, { zIndex: 1 }, 1.75) // once past upright, tuck it behind the letter
-          .to(q('[data-seal]'), { opacity: 0, duration: 0.2, ease: 'sine.in' }, 1.55)
-          .to(letter, { yPercent: -66, duration: 0.6, ease: 'power2.inOut' }, 1.8)
+          .to(topFlap, { rotationX: 180, duration: 0.75, ease: 'power2.inOut' }, 1.5)
+          .to(q('[data-seal]'), { opacity: 0, duration: 0.25, ease: 'sine.in' }, 1.75) // hide it once the flap is past upright
 
-        // 3. Names, heart, burst
-        tl.to(parts.first, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'back.out(1.7)' }, 2.4)
-          .to(parts.heart, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2.2)' }, 2.7)
+        // 3. Names pop up out of the envelope, heart in the middle, burst, two beats
+        tl.to(parts.first, { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: 'back.out(1.7)' }, 2.4)
+          .to(parts.heart, { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: 'back.out(2.2)' }, 2.68)
           .call(() => {
             const r = heart.getBoundingClientRect()
             burst(q('[data-burst]')[0], r.left + r.width / 2, r.top + r.height / 2, small)
-          }, [], 2.88)
-          .to(parts.second, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'back.out(1.7)' }, 2.95)
+          }, [], 2.9)
+          .to(parts.second, { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: 'back.out(1.7)' }, 2.95)
           .to(parts.heart, { scale: 1.2, duration: 0.14, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 3.3)
           .to(parts.heart, { scale: 1.2, duration: 0.14, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 3.62)
 
         // 4. Hold (3.8 – 4.3s)
 
-        // 5. Push into the letter; the names travel into the hero heading
-        tl.to(q('[data-stage]'), { scale: 7, duration: 1.2, ease: 'power2.inOut' }, 4.3)
-          .to(q('[data-env-part]'), { opacity: 0, duration: 0.5, ease: 'sine.inOut' }, 4.45)
-          .to(q('[data-paper]'), { opacity: 0, duration: 0.6, ease: 'sine.inOut' }, 4.7)
-          .to(group, { x: 0, y: 0, scale: 1, duration: 1.2, ease: 'power2.inOut' }, 4.3)
-          .to(parts.heart, { opacity: 0, scale: 0.6, duration: 0.45, ease: 'sine.inOut' }, 4.95)
-          .to(parts.amp, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, 5.0)
-          .to(heroText, { opacity: 1, duration: 0.6, ease: 'sine.inOut' }, 4.9)
+        // 5. The envelope opens toward the camera like petals...
+        tl.to(q('[data-panel="left"]'), { rotationY: -100, duration: 0.6, ease: 'back.out(1.2)' }, 4.3)
+          .to(q('[data-panel="right"]'), { rotationY: 100, duration: 0.6, ease: 'back.out(1.2)' }, 4.34)
+          .to(q('[data-panel="bottom"]'), { rotationX: -100, duration: 0.6, ease: 'back.out(1.2)' }, 4.38)
+          .to(topFlap, { rotationX: 155, duration: 0.6, ease: 'power2.inOut' }, 4.3)
+          .to(shadow, { opacity: 0, duration: 0.4, ease: 'sine.inOut' }, 4.3)
+          // ...and the camera dips, then flies forward into it.
+          .to(world, { rotationX: 14, duration: 0.5, ease: 'sine.inOut' }, 4.3)
+          .to(world, { rotationX: 0, duration: 0.95, ease: 'sine.inOut' }, 4.8)
+          .to(world, { z: 950, duration: 1.3, ease: 'power2.inOut' }, 4.45)
+          .to(q('[data-panel]'), { opacity: 0, duration: 0.3, ease: 'sine.inOut' }, 4.92)
+          // The inside of the envelope fills the screen and melts into the page.
+          .to(q('[data-inside]'), { opacity: 0, duration: 0.5, ease: 'sine.inOut' }, 5.25)
+          .to(heroText, { opacity: 1, duration: 0.65, ease: 'sine.inOut' }, 5.1)
+          // The names travel into the hero heading; the heart becomes the "&".
+          .to(group, { x: 0, y: 0, scale: 1, duration: 1.3, ease: 'power2.inOut' }, 4.45)
+          .to(parts.heart, { opacity: 0, scale: 0.6, duration: 0.45, ease: 'sine.inOut' }, 5.15)
+          .to(parts.amp, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, 5.2)
       }, root)
 
       // Handy for checking the timing while developing.
@@ -251,56 +261,47 @@ export function Intro({ onDone }: { onDone: () => void }) {
       className="intro-layer fixed inset-0 z-[100]"
     >
       {/* No backdrop of its own: the page's drifting gradient shows through, and the
-          hero's text is held back until the camera pushes into the letter. */}
+          hero's text is held back until the camera flies into the envelope. */}
       {!reduced && (
-        <div data-stage aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
-          <div data-envelope className="envelope">
-            <div data-env-part className="env-back" />
-            <div data-letter className="letter">
-              <div data-paper className="letter-paper">
-                <span className="label letter-label">{memories.hero.label}</span>
-              </div>
-            </div>
-            <div data-env-part className="env-pocket">
-              <svg className="env-folds" viewBox="0 0 100 64" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M0 64 L50 33 L100 64" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="0.35" />
-              </svg>
-            </div>
-            <div data-flap data-env-part className="env-flap">
-              <div className="flap-face flap-front">
+        // A real 3D scene: the camera is the perspective, the "world" is what it flies through.
+        <div data-camera aria-hidden="true" className="intro-camera absolute inset-0 flex items-center justify-center">
+          <div data-world className="intro-world">
+            <div data-env-shadow className="env-shadow" />
+            <div data-envelope className="envelope">
+              <div data-inside className="env-back" />
+              {/* Front flaps, each hinged on its outer edge, with an outside and an inside face. */}
+              <EnvelopePanel side="bottom" />
+              <EnvelopePanel side="left" />
+              <EnvelopePanel side="right" />
+              <EnvelopePanel side="top">
                 <div data-seal className="env-seal">
-                  <svg viewBox="0 0 48 44" width="100%" height="100%">
-                    <defs>
-                      <radialGradient id="wax" cx="38%" cy="32%" r="75%">
-                        <stop offset="0" stopColor="#FBB3CD" />
-                        <stop offset="0.55" stopColor="#F58FB5" />
-                        <stop offset="1" stopColor="#E0739C" />
-                      </radialGradient>
-                    </defs>
-                    <path
-                      fill="url(#wax)"
-                      d="M24 42.5c-.8 0-1.6-.3-2.2-.8C14.6 35.6 2.5 26.8 2.5 15.6 2.5 8.6 7.9 3 14.6 3c3.9 0 7.2 1.9 9.4 4.9C26.2 4.9 29.5 3 33.4 3 40.1 3 45.5 8.6 45.5 15.6c0 11.2-12.1 20-19.3 26.1-.6.5-1.4.8-2.2.8z"
-                    />
-                    <path
-                      fill="none"
-                      stroke="rgba(255,255,255,0.55)"
-                      strokeWidth="1.2"
-                      d="M24 34.5c-5.5-4.6-13-10.4-13-17.3 0-4 3-7.2 6.8-7.2 2.9 0 5 1.7 6.2 4 1.2-2.3 3.3-4 6.2-4 3.8 0 6.8 3.2 6.8 7.2 0 6.9-7.5 12.7-13 17.3z"
-                    />
-                  </svg>
+                  <Seal />
                 </div>
-              </div>
-              <div className="flap-face flap-inside" />
+              </EnvelopePanel>
             </div>
           </div>
-          <div data-env-shadow data-env-part className="env-shadow" />
         </div>
       )}
+
+      {/* Shared colours for the envelope faces. */}
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <defs>
+          <linearGradient id="env-out" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#FFE9F1" />
+            <stop offset="0.5" stopColor="#FFFDFB" />
+            <stop offset="1" stopColor="#EAF2FF" />
+          </linearGradient>
+          <linearGradient id="env-in" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#F6E6EE" />
+            <stop offset="1" stopColor="#ECF0FB" />
+          </linearGradient>
+        </defs>
+      </svg>
 
       {/* Sparkles and ribbons are added here during the burst. */}
       <div data-burst aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" />
 
-      {/* The names, laid out exactly like the hero heading (then scaled onto the letter). */}
+      {/* The names, laid out exactly like the hero heading (then scaled onto the envelope). */}
       <div data-names aria-hidden="true" className="intro-names pointer-events-none absolute inset-0">
         <span data-part="first" className="intro-name italic text-ink">
           {first}
@@ -320,5 +321,53 @@ export function Intro({ onDone }: { onDone: () => void }) {
         Skip
       </button>
     </div>
+  )
+}
+
+// Triangle shapes (in % of the envelope) for each flap, outside and inside.
+// The inside face is drawn mirrored, because it is flipped 180° to sit behind.
+const PANELS = {
+  left: { out: '0,3 50,52 0,97', in: '100,3 50,52 100,97', flip: 'rotateY(180deg)' },
+  right: { out: '100,3 50,52 100,97', in: '0,3 50,52 0,97', flip: 'rotateY(180deg)' },
+  bottom: { out: '3,100 50,52 97,100', in: '3,0 50,48 97,0', flip: 'rotateX(180deg)' },
+  top: { out: '2,0 98,0 50,100', in: '2,100 98,100 50,0', flip: 'rotateX(180deg)' },
+} as const
+
+function EnvelopePanel({ side, children }: { side: keyof typeof PANELS; children?: ReactNode }) {
+  const shape = PANELS[side]
+  return (
+    <div data-panel={side} className={`env-panel env-panel-${side}`}>
+      <svg className="panel-face" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polygon points={shape.out} fill="url(#env-out)" stroke="#fff" strokeWidth="1.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+      </svg>
+      <svg className="panel-face" style={{ transform: shape.flip }} viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polygon points={shape.in} fill="url(#env-in)" stroke="#fff" strokeWidth="1" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+      </svg>
+      {children}
+    </div>
+  )
+}
+
+function Seal() {
+  return (
+    <svg viewBox="0 0 48 44" width="100%" height="100%">
+      <defs>
+        <radialGradient id="wax" cx="38%" cy="32%" r="75%">
+          <stop offset="0" stopColor="#FBB3CD" />
+          <stop offset="0.55" stopColor="#F58FB5" />
+          <stop offset="1" stopColor="#E0739C" />
+        </radialGradient>
+      </defs>
+      <path
+        fill="url(#wax)"
+        d="M24 42.5c-.8 0-1.6-.3-2.2-.8C14.6 35.6 2.5 26.8 2.5 15.6 2.5 8.6 7.9 3 14.6 3c3.9 0 7.2 1.9 9.4 4.9C26.2 4.9 29.5 3 33.4 3 40.1 3 45.5 8.6 45.5 15.6c0 11.2-12.1 20-19.3 26.1-.6.5-1.4.8-2.2.8z"
+      />
+      <path
+        fill="none"
+        stroke="rgba(255,255,255,0.55)"
+        strokeWidth="1.2"
+        d="M24 34.5c-5.5-4.6-13-10.4-13-17.3 0-4 3-7.2 6.8-7.2 2.9 0 5 1.7 6.2 4 1.2-2.3 3.3-4 6.2-4 3.8 0 6.8 3.2 6.8 7.2 0 6.9-7.5 12.7-13 17.3z"
+      />
+    </svg>
   )
 }

@@ -19,10 +19,25 @@ const smooth = (a: number, b: number, x: number) => {
 /** Lets each face start a little after the previous one. */
 const stagger = (t: number, i: number, spread = 0.22) => clamp01((t - (i / 5) * spread) / (1 - spread))
 
+/** Ease-out with a gentle overshoot, for the cards' springy landing. */
+const springOut = (t: number) => {
+  const c = 1.2
+  return t === 0 ? 0 : 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2)
+}
+
 const FOV = 30
 const CAMERA_Z = 10
 const FACE_INSET = 0.95 // photo size relative to the cube; the white rounded body shows around it
 const BODY_RADIUS = 0.06
+
+// Resting behaviour.
+const SLANT_FORWARD = THREE.MathUtils.degToRad(25) // tipped toward the viewer, so the top shows
+const SLANT_SIDE = THREE.MathUtils.degToRad(20) // leaning sideways, as if balanced on a corner
+const SPIN_PERIOD = 18 // seconds per full clockwise turn
+const LEAN = THREE.MathUtils.degToRad(10) // max lean toward the cursor
+const DRIFT_PX = 12 // max drift toward the cursor
+const FLOAT_PX = 8 // gentle float up and down…
+const FLOAT_PERIOD = 5 // …on a 5 second loop
 
 // The six faces: outward direction and rotation, in cube-1 … cube-6 order.
 const FACES = [
@@ -95,63 +110,91 @@ function Scene({ stage, active, lite }: Props) {
     })
   }, [active])
 
-  // ── Resting motion: slow spin, tilt toward the cursor, finger drag ──
-  const rest = useRef({ spin: -0.6, tiltX: 0, tiltY: 0, targetX: 0, targetY: 0, dragX: 0, velocity: 0, dragging: false })
+  // ── Resting motion: slanted clockwise spin, lean + drift toward the cursor, float ──
+  const rest = useRef({
+    spin: 0,
+    velocity: 0, // extra spin from a finger drag, decays away
+    dragging: false,
+    pressX: 0,
+    lean: new THREE.Vector2(), // current lean/drift direction, -1…1 (damped)
+    target: new THREE.Vector2(), // where the cursor is, relative to the cube
+    hover: 0,
+    cx: 0, // cube centre on screen, for the cursor maths
+    cy: 0,
+  })
+
+  // Random but fixed phases/speeds for each card's gentle idle drift once opened.
+  const idle = useMemo(
+    () =>
+      Array.from({ length: 6 }, () => ({
+        phase: Array.from({ length: 7 }, () => Math.random() * Math.PI * 2),
+        speed: Array.from({ length: 7 }, () => 0.35 + Math.random() * 0.4),
+      })),
+    [],
+  )
 
   useEffect(() => {
     const r = rest.current
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return
-      r.targetY = (e.clientX / window.innerWidth - 0.5) * 0.7
-      r.targetX = (e.clientY / window.innerHeight - 0.5) * 0.45
+      // Direction from the cube to the cursor, scaled so the far edge of the screen = 1.
+      const x = (e.clientX - r.cx) / (window.innerWidth / 2)
+      const y = (e.clientY - r.cy) / (window.innerHeight / 2)
+      r.target.set(x, y)
+      if (r.target.length() > 1) r.target.normalize()
     }
+    const onLeave = () => r.target.set(0, 0)
     window.addEventListener('pointermove', onMove, { passive: true })
+    document.addEventListener('pointerleave', onLeave)
 
+    // Finger (or mouse) drag spins it a little; a short press without moving is a tap.
     const slot = stage.slot
     let lastX = 0
-    let lastY = 0
     const down = (e: PointerEvent) => {
       r.dragging = true
-      lastX = e.clientX
-      lastY = e.clientY
-      slot?.setPointerCapture(e.pointerId)
+      stage.dragged = false
+      lastX = r.pressX = e.clientX
     }
     const move = (e: PointerEvent) => {
       if (!r.dragging) return
       const dx = e.clientX - lastX
-      const dy = e.clientY - lastY
       lastX = e.clientX
-      lastY = e.clientY
+      if (Math.abs(e.clientX - r.pressX) > 8) stage.dragged = true
+      if (!stage.dragged) return
       r.spin += dx * 0.01
-      r.velocity = dx * 0.01
-      r.dragX = THREE.MathUtils.clamp(r.dragX + dy * 0.006, -0.6, 0.6)
+      r.velocity = dx * 0.6
     }
     const up = () => {
       r.dragging = false
     }
     slot?.addEventListener('pointerdown', down)
-    slot?.addEventListener('pointermove', move)
-    slot?.addEventListener('pointerup', up)
-    slot?.addEventListener('pointercancel', up)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
     return () => {
       window.removeEventListener('pointermove', onMove)
+      document.removeEventListener('pointerleave', onLeave)
       slot?.removeEventListener('pointerdown', down)
-      slot?.removeEventListener('pointermove', move)
-      slot?.removeEventListener('pointerup', up)
-      slot?.removeEventListener('pointercancel', up)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
     }
   }, [stage])
 
   // Scratch objects reused every frame (no garbage while scrolling).
   const tmp = useMemo(
     () => ({
-      qRest: new THREE.Quaternion(),
-      qScript: new THREE.Quaternion(),
+      qSlant: new THREE.Quaternion().setFromEuler(new THREE.Euler(SLANT_FORWARD, 0, -SLANT_SIDE, 'XYZ')),
+      qSpin: new THREE.Quaternion(),
+      qLean: new THREE.Quaternion(),
       qCube: new THREE.Quaternion(),
       qFace: new THREE.Quaternion(),
+      qIdle: new THREE.Quaternion(),
       identity: new THREE.Quaternion(),
+      up: new THREE.Vector3(0, 1, 0),
       euler: new THREE.Euler(),
       center: new THREE.Vector3(),
+      normal: new THREE.Vector3(),
       onCube: new THREE.Vector3(),
       apart: new THREE.Vector3(),
       grid: new THREE.Vector3(),
@@ -182,46 +225,54 @@ function Scene({ stage, active, lite }: Props) {
     const slot = stage.slot?.getBoundingClientRect()
     if (!slot) return
     const mobile = vw < 768
-    // A turned cube looks about 1.35× wider than its edge, so size the edge
+    // A slanted cube looks about 1.35× wider than its edge, so size the edge
     // to make its outline fill the slot (≈380px desktop, 240px mobile).
-    const restPx = slot.width * 0.74
+    const restPx = slot.width * (mobile ? 0.7 : 0.74)
     const centrePx = mobile ? Math.min(vw * 0.52, 240) : restPx * 1.12
 
-    const turn = ease(range(p, PHASES.turn))
+    const glide = ease(range(p, PHASES.glide))
     const sep = range(p, PHASES.separate)
     const settle = range(p, PHASES.settle)
+    // Everything "alive" about the resting cube fades out as it opens.
+    const restWeight = 1 - smooth(0, 0.12, p)
 
-    const cubePx = THREE.MathUtils.lerp(restPx, centrePx, turn)
+    const r = rest.current
+    r.cx = slot.left + slot.width / 2
+    r.cy = slot.top + slot.height / 2
+
+    // Lean/drift toward the cursor, with smooth damping (glides, never jerks).
+    r.lean.x = THREE.MathUtils.damp(r.lean.x, r.target.x, 3.2, dt)
+    r.lean.y = THREE.MathUtils.damp(r.lean.y, r.target.y, 3.2, dt)
+    r.hover = THREE.MathUtils.damp(r.hover, stage.hoverCube && p < 0.02 ? 1 : 0, 8, dt)
+
+    const driftX = r.lean.x * DRIFT_PX * restWeight
+    const driftY = r.lean.y * DRIFT_PX * restWeight
+    const floatY = Math.sin((t * Math.PI * 2) / FLOAT_PERIOD) * FLOAT_PX * restWeight
+
+    const cubePx = THREE.MathUtils.lerp(restPx, centrePx, glide) * (1 + 0.04 * r.hover)
     const S = cubePx * k
     toWorld(
-      THREE.MathUtils.lerp(slot.left + slot.width / 2, vw / 2, turn),
-      THREE.MathUtils.lerp(slot.top + slot.height / 2, vh / 2, turn),
+      THREE.MathUtils.lerp(r.cx + driftX, vw / 2, glide),
+      THREE.MathUtils.lerp(r.cy + driftY - floatY, vh / 2, glide),
       tmp.center,
     )
-    const bob = Math.sin(t * 1.1) * 0.025 * S * (1 - turn)
-    tmp.center.y += bob
 
-    // Resting rotation.
-    const r = rest.current
-    const restWeight = 1 - smooth(0, 0.1, p)
-    if (!r.dragging) {
-      r.velocity *= Math.pow(0.04, dt)
-      r.spin += (0.22 * restWeight + r.velocity * 8) * dt
-      r.dragX *= Math.pow(0.3, dt)
-    }
-    r.tiltX = THREE.MathUtils.damp(r.tiltX, r.targetX, 3, dt)
-    r.tiltY = THREE.MathUtils.damp(r.tiltY, r.targetY, 3, dt)
-    tmp.qRest.setFromEuler(tmp.euler.set(0.42 + r.tiltX + r.dragX, r.spin + r.tiltY, 0, 'XYZ'))
+    // Clockwise spin (seen from above) that eases to a stop as it opens; a drag adds a nudge.
+    if (!r.dragging) r.velocity *= Math.pow(0.05, dt)
+    r.spin += (-(Math.PI * 2) / SPIN_PERIOD + r.velocity) * dt * restWeight
+    tmp.qSpin.setFromAxisAngle(tmp.up, r.spin)
+    tmp.qLean.setFromEuler(tmp.euler.set(r.lean.y * LEAN * restWeight, r.lean.x * LEAN * restWeight, 0, 'XYZ'))
+    // Lean (toward cursor) × slant (balanced on a corner) × spin (around its own axis).
+    tmp.qCube.copy(tmp.qLean).multiply(tmp.qSlant).multiply(tmp.qSpin)
 
-    // Scripted full turn: around once, dipping to show the top and the bottom.
-    tmp.qScript.setFromEuler(tmp.euler.set(0.55 * Math.sin(turn * Math.PI * 2), -Math.PI * 2 * turn, 0, 'XYZ'))
-    tmp.qCube.slerpQuaternions(tmp.qRest, tmp.qScript, 1 - restWeight)
-
-    // Grid card centres (for the explode direction and final positions).
+    // Grid card centres (for the separate direction and final positions).
     const rects = stage.cards.map((el) => el?.getBoundingClientRect())
     tmp.gridCenter.set(0, 0, 0)
     rects.forEach((rc) => rc && tmp.gridCenter.add(toWorld(rc.left + rc.width / 2, rc.top + rc.height / 2, tmp.grid)))
     tmp.gridCenter.multiplyScalar(1 / 6)
+
+    // Once fully open, the cards drift and play softly.
+    const play = smooth(0.93, 1, p)
 
     for (let i = 0; i < 6; i++) {
       const mesh = faceRefs.current[i]
@@ -229,35 +280,50 @@ function Scene({ stage, active, lite }: Props) {
       if (!mesh || !rc) continue
       const face = FACES[i]
       const u = ease(stagger(sep, i))
-      const v = ease(stagger(settle, i))
+      const vRaw = stagger(settle, i)
+      const v = springOut(vRaw) // soft spring: a touch past, then settles
+      const vc = clamp01(v)
 
       // A: sitting on the cube.
-      tmp.onCube.copy(face.normal).multiplyScalar(S / 2 + S * 0.004).applyQuaternion(tmp.qCube).add(tmp.center)
+      tmp.normal.copy(face.normal).applyQuaternion(tmp.qCube)
+      tmp.onCube.copy(tmp.normal).multiplyScalar(S / 2 + S * 0.004).add(tmp.center)
       tmp.qFace.multiplyQuaternions(tmp.qCube, face.quat)
 
-      // B: drifted apart, gaps opening, already leaning toward its grid spot.
+      // B: drifted apart in 3D, gaps opening, already leaning toward its grid spot.
       toWorld(rc.left + rc.width / 2, rc.top + rc.height / 2, tmp.grid)
       tmp.apart
-        .copy(face.normal)
-        .multiplyScalar(S * 0.85)
+        .copy(tmp.normal)
+        .multiplyScalar(S * 0.9)
         .add(tmp.center)
         .addScaledVector(tmp.offset.subVectors(tmp.grid, tmp.gridCenter), 0.35)
 
       // C: flat card in the grid.
       tmp.pos.lerpVectors(tmp.onCube, tmp.apart, u).lerp(tmp.grid, v)
-      mesh.position.copy(tmp.pos)
       mesh.quaternion.slerpQuaternions(tmp.qFace, tmp.identity, u)
 
       tmp.hover[i] = THREE.MathUtils.damp(tmp.hover[i], stage.hover === i && p > 0.97 ? 1 : 0, 10, dt)
+
+      // Idle play: a slow, random-looking float and sway for each card (calmer under the cursor).
+      const w = play * (1 - 0.75 * tmp.hover[i])
+      if (w > 0) {
+        const { phase: ph, speed: sp } = idle[i]
+        const wave = (j: number) => Math.sin(t * sp[j] + ph[j])
+        tmp.pos.x += (wave(0) + 0.5 * wave(1)) * 5 * k * w
+        tmp.pos.y += (wave(2) + 0.5 * wave(3)) * 5 * k * w
+        tmp.qIdle.setFromEuler(tmp.euler.set(wave(4) * 0.07 * w, wave(5) * 0.07 * w, wave(6) * 0.035 * w, 'XYZ'))
+        mesh.quaternion.multiply(tmp.qIdle)
+      }
+      mesh.position.copy(tmp.pos)
+
       const faceWorld = S * FACE_INSET
       const scale = THREE.MathUtils.lerp(faceWorld, rc.width * k, v) * (1 + tmp.hover[i] * 0.03)
       mesh.scale.setScalar(scale)
 
       const px = Math.max(scale / k, 1)
       const uniforms = faces[i].material.uniforms
-      uniforms.uRadius.value = THREE.MathUtils.lerp(0.035, Math.min(24 / px, 0.2), v)
+      uniforms.uRadius.value = THREE.MathUtils.lerp(0.035, Math.min(24 / px, 0.2), vc)
       uniforms.uBorder.value = Math.max(1.5 / px, 0.003)
-      uniforms.uLight.value = 1 - v
+      uniforms.uLight.value = 1 - vc
     }
 
     // The white rounded body shrinks away as the faces separate.
@@ -270,13 +336,13 @@ function Scene({ stage, active, lite }: Props) {
       body.scale.setScalar(Math.max(bodyScale, 0.0001))
     }
 
-    // Floating shadow, fading as the faces separate.
+    // Floating shadow: smaller and fainter as the cube floats up; fades as it opens.
     const shadow = shadowRef.current
     if (shadow) {
-      const lift = (bob / (0.025 * S || 1)) * 0.5 + 0.5
-      shadow.position.set(tmp.center.x, tmp.center.y - bob - S * 1.02, -S * 0.3)
+      const lift = (floatY / FLOAT_PX) * 0.5 + 0.5
+      shadow.position.set(tmp.center.x, tmp.center.y - floatY * k - S * 1.05, -S * 0.3)
       shadow.scale.set(S * (1.45 - lift * 0.12), S * 0.32, 1)
-      ;(shadow.material as THREE.MeshBasicMaterial).opacity = 0.55 * (1 - smooth(0, 0.3, sep)) * (1 - lift * 0.15)
+      ;(shadow.material as THREE.MeshBasicMaterial).opacity = 0.5 * (1 - smooth(0, 0.3, sep)) * (1 - lift * 0.18)
     }
   })
 

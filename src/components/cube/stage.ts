@@ -7,18 +7,25 @@ export type Stage = {
   progress: number
   /** Index of the card under the pointer, or -1. */
   hover: number
+  /** True while the pointer is over the resting cube. */
+  hoverCube: boolean
+  /** True if the last press on the cube turned into a drag (so it isn't a tap). */
+  dragged: boolean
   /** The empty box in the hero where the cube rests. */
   slot: HTMLElement | null
   /** The six card positions in the grid, in face order. */
   cards: (HTMLElement | null)[]
 }
 
-export const createStage = (): Stage => ({ progress: 0, hover: -1, slot: null, cards: [] })
+export const createStage = (): Stage => ({ progress: 0, hover: -1, hoverCube: false, dragged: false, slot: null, cards: [] })
 
-// Scroll timeline: where each step of the animation starts and ends (0–1).
+// One timeline (0–1) drives the opening, whether it comes from a click or from scrolling.
 export const PHASES = {
-  turn: [0, 0.38], // move to centre and make one full turn
-  separate: [0.38, 0.62], // faces drift apart and turn to the viewer
-  settle: [0.62, 0.9], // faces land in the grid as cards
-  captions: 0.88, // captions fade in from here
+  glide: [0, 0.25], // spin eases to a stop, cube glides to the centre, hero dims
+  separate: [0.2, 0.6], // faces drift apart in 3D and turn to the viewer
+  settle: [0.55, 0.92], // faces land in the grid as rounded cards
+  captions: 0.8, // captions fade in one after another from here
 } as const
+
+/** How long a click takes to open (or close) the memories, in seconds. */
+export const OPEN_DURATION = 2.4
