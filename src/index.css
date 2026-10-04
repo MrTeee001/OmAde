@@ -297,6 +297,8 @@
   color: var(--color-rose);
   filter: drop-shadow(0 2px 4px rgba(245, 143, 181, 0.45));
 }
+/* Frames fly in from the sides on phones; keep them from widening the page meanwhile. */
+.story { overflow-x: clip; }
 .story-list {
   display: flex;
   flex-direction: column;
@@ -463,6 +465,31 @@
 @media (max-width: 480px) {
   .letter-card { padding: 40px 22px 36px 44px; font-size: 17px; }
 }
+
+/* ── Music button ─────────────────────────────────────────── */
+.song-toggle {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #fff;
+  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--color-rose);
+  cursor: pointer;
+}
+.song-toggle.is-off { color: var(--color-ink-soft); }
+.intro .song-toggle { opacity: 0 !important; pointer-events: none; }
+.song-toggle:not(:hover):not(:focus-visible) { opacity: 0.75; }
+.song-toggle:focus-visible { outline: 2px solid var(--color-rose); outline-offset: 2px; }
 
 /* ── Opening sequence ─────────────────────────────────────── */
 .intro-layer {

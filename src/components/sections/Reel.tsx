@@ -64,7 +64,11 @@ export function Reel() {
                     className="reel-sound"
                     aria-pressed={on}
                     aria-label={on ? `Mute clip ${i + 1}` : `Play clip ${i + 1} with sound`}
-                    onClick={() => setSound(on ? null : i)}
+                    onClick={() => {
+                      setSound(on ? null : i)
+                      // Let the background song step aside while a clip plays with sound.
+                      window.dispatchEvent(new CustomEvent('memories:clip-sound', { detail: !on }))
+                    }}
                   >
                     <span className="label !text-ink">{on ? 'Sound on' : 'Tap for sound'}</span>
                   </button>

@@ -27,9 +27,9 @@ const VIDEO = 'video'
 
 /*
  * Every visit (and every reload) shuffles the whole pile of photos and videos
- * and deals it out at random. Nothing is saved, so each visit is different:
+ * and deals it out at random. Nothing is saved, so each visit is different.
+ * (The closing picture is fixed and lives outside the pile, in public/closing/.)
  *   - the reel ("Moving pictures") gets up to 4 videos,
- *   - the closing spot gets a photo,
  *   - the cube gets 6 of whatever is left (photos or videos),
  *   - every remaining file becomes a memory frame.
  */
@@ -37,12 +37,10 @@ const pile = shuffle(allMedia)
 const empty = pile.length === 0
 
 const reel = take(pile, 4, isVideo)
-const closing = take(pile, 1, (f) => !isVideo(f))[0] ?? take(pile, 1)[0] ?? PHOTO
 const cube = take(pile, 6)
 const frames = pile
 
 export const reelClips: string[] = empty ? Array(4).fill(VIDEO) : reel
-export const closingMedia: string = closing
 /** The six cube faces; captions belong to the card spots, not to particular photos. */
 export const cubeFaces = memories.cubeCaptions.slice(0, 6).map((caption, i) => ({
   media: cube[i] ?? PHOTO,

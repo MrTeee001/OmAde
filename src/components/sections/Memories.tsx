@@ -42,16 +42,20 @@ export function Memories() {
         },
       )
 
-      // Each frame straightens and rises into place.
-      gsap.utils.toArray<HTMLElement>('[data-story-entry]').forEach((entry) => {
+      // Each frame straightens and settles into place. On phones the frames fly in
+      // from alternating sides (left, right, left…); on larger screens they rise.
+      const mobile = window.matchMedia('(max-width: 767px)').matches
+      gsap.utils.toArray<HTMLElement>('[data-story-entry]').forEach((entry, i) => {
         const tilt = Number(entry.dataset.tilt)
-        const tl = gsap.timeline({ scrollTrigger: { trigger: entry, start: 'top 82%', once: true } })
+        const from = mobile
+          ? { x: (i % 2 === 0 ? -1 : 1) * window.innerWidth * 0.9, y: 0, rotation: (i % 2 === 0 ? -1 : 1) * 6, opacity: 0 }
+          : { x: 0, y: 60, rotation: tilt, opacity: 0 }
+        const tl = gsap.timeline({ scrollTrigger: { trigger: entry, start: mobile ? 'top 88%' : 'top 82%', once: true } })
         tl.fromTo(
           entry.querySelector('[data-story-photo]'),
-          { rotation: tilt, y: 60, opacity: 0 },
-          { rotation: 0, y: 0, opacity: 1, duration: 1.1, ease: 'power3.out' },
-        )
-          .fromTo(entry.querySelector('[data-story-dot]'), { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(2)' }, 0.1)
+          from,
+          { x: 0, y: 0, rotation: 0, opacity: 1, duration: mobile ? 0.9 : 1.1, ease: 'power3.out' },
+        ).fromTo(entry.querySelector('[data-story-dot]'), { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(2)' }, 0.1)
       })
     }, root) // the line, heart and entries all live inside this box
     return () => ctx.revert()

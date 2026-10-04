@@ -1,4 +1,6 @@
-import files from 'virtual:memories-manifest'
+import manifest from 'virtual:memories-manifest'
+
+const files = manifest.media
 
 export type MediaInfo = {
   name: string
@@ -11,6 +13,9 @@ const available = new Set(files)
 
 /** Every photo and video in public/memories/, whatever their names. */
 export const allMedia = files
+
+/** The background song (public/audio/…), or null if none has been added yet. */
+export const songUrl = manifest.song ? `${import.meta.env.BASE_URL}audio/${encodeURIComponent(manifest.song)}` : null
 export const isVideo = (file: string) => VIDEO.test(file)
 
 /**

@@ -6,7 +6,8 @@
  *  Photos and videos: just put them in the folder  public/memories/
  *  (any file names, .jpg .png .webp .mp4 …). On every visit the site
  *  shuffles them all and deals them out at random: the cube, the memory
- *  frames, the reel (videos) and the closing picture. Every file gets used.
+ *  frames and the reel (videos). Every file gets used. The closing picture
+ *  never changes (it lives in public/closing/).
  *  Until there are files, soft placeholder tiles are shown instead.
  * ─────────────────────────────────────────────────────────────
  */
