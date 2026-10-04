@@ -8,7 +8,8 @@ Feel: soft, cute, premium. Lots of air, gentle motion, nothing loud. Light ("day
 ("night") themes.
 
 - Repository: https://github.com/MrTeee001/OmAde (branch `claude/happy-mccarthy-3s4g5e` — the only branch)
-- Deploy: Netlify (settings in `netlify.toml`; see "Deploying" below)
+- Live site: **https://ade-omolade.netlify.app** (Netlify, auto-deploys on every push to the branch above;
+  settings in `netlify.toml`, see "Deploying" below)
 
 ---
 
@@ -208,7 +209,8 @@ while `html.intro` is set. Timeline (seconds):
 ## Deploying (Netlify)
 
 `netlify.toml`: build `npm run build`, publish `dist`, Node 22, noindex + cache headers.
-Connect once in Netlify: **Add new site → Import an existing project → GitHub → MrTeee001/OmAde →
+Live at **https://ade-omolade.netlify.app** — already connected (owner's Netlify account, linked to
+the GitHub repo). How it was connected, for reference: **Add new site → Import an existing project → GitHub → MrTeee001/OmAde →
 branch `claude/happy-mccarthy-3s4g5e`** (settings are read from `netlify.toml`). After that, every
 push to that branch redeploys automatically. Media is served from `dist/memories`, `dist/closing`,
 `dist/audio` (copied from `public/`).
@@ -238,5 +240,5 @@ want — Claude reads this file first and knows how everything works. For exampl
 - **Change the closing picture**: send the photo and say "make this the closing picture".
 - **Change the start date** or names: just say the new one.
 
-After any change, ask Claude to "save and push it". If the site is connected to Netlify, the live
-site updates by itself a minute or two later.
+After any change, ask Claude to "save and push it". The live site, https://ade-omolade.netlify.app,
+updates by itself a minute or two later.
