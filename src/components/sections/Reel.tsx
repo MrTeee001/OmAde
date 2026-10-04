@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import { reelClips } from '../../lib/order'
+import { reelClips } from '../../lib/deal'
 import { getMedia } from '../../lib/media'
 import { prefersReducedMotion } from '../../lib/motion'
 import { MediaTile } from '../MediaTile'
@@ -18,9 +18,9 @@ export function Reel() {
   const reduced = prefersReducedMotion()
 
   useEffect(() => {
-    if (reduced) return
-    const pin = pinRef.current!
-    const row = rowRef.current!
+    const pin = pinRef.current
+    const row = rowRef.current
+    if (reduced || !pin || !row) return
     // The row starts nudged in from the right and travels until its last clip is fully in view.
     const startX = () => window.innerWidth * 0.18
     const distance = () => Math.max(0, row.scrollWidth - pin.clientWidth + 48)
@@ -42,6 +42,9 @@ export function Reel() {
     return () => ctx.revert()
   }, [reduced])
 
+  // No videos among the files: leave this section out.
+  if (reelClips.length === 0) return null
+
   return (
     <section className="section-gap" aria-labelledby="reel-title">
       <div ref={pinRef} className={`reel-pin ${reduced ? '' : 'min-h-svh'} flex flex-col justify-center overflow-hidden py-12`}>
@@ -53,7 +56,7 @@ export function Reel() {
             const isVideo = getMedia(name).kind === 'video'
             const on = sound === i
             return (
-              <li key={name} className="reel-card">
+              <li key={i} className="reel-card">
                 <MediaTile name={name} alt={`Clip ${i + 1}`} muted={!on} className="h-full w-full border border-white" />
                 {isVideo && (
                   <button

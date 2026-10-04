@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { memoryFrames } from '../../lib/order'
+import { memoryFrames } from '../../lib/deal'
 import { prefersReducedMotion } from '../../lib/motion'
 import { Heart } from '../Heart'
 import { MediaTile } from '../MediaTile'
@@ -18,8 +18,9 @@ export function Memories() {
   const listRef = useRef<HTMLOListElement>(null)
 
   useEffect(() => {
-    if (prefersReducedMotion()) return
-    const list = listRef.current!
+    const list = listRef.current
+    const root = rootRef.current
+    if (prefersReducedMotion() || !list || !root) return
     const ctx = gsap.context(() => {
       // The line draws as the list scrolls past the middle of the screen.
       gsap.fromTo(
@@ -52,9 +53,12 @@ export function Memories() {
         )
           .fromTo(entry.querySelector('[data-story-dot]'), { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(2)' }, 0.1)
       })
-    }, rootRef.current!) // the line, heart and entries all live inside this box
+    }, root) // the line, heart and entries all live inside this box
     return () => ctx.revert()
   }, [])
+
+  // With only a few files, all of them may be on the cube/reel/closing instead.
+  if (memoryFrames.length === 0) return null
 
   return (
     <section id="memories" className="section-gap" aria-labelledby="memories-title">
@@ -76,7 +80,7 @@ export function Memories() {
               // Printed-photo tilt: 2–3°, alternating direction.
               const tilt = (i % 2 === 0 ? -1 : 1) * (2 + (i % 3) * 0.5)
               return (
-                <li key={name} data-story-entry data-tilt={tilt} className={`story-entry story-entry-${side}`}>
+                <li key={i} data-story-entry data-tilt={tilt} className={`story-entry story-entry-${side}`}>
                   <span data-story-dot className="story-dot" aria-hidden="true" />
                   <div data-story-photo className="story-photo">
                     <MediaTile name={name} alt={`A memory (${i + 1} of ${memoryFrames.length})`} className="aspect-[4/5] w-full border border-white shadow-[0_8px_30px_rgba(111,168,245,0.12)]" />

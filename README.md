@@ -6,15 +6,11 @@ A one-page memories website.
 Open `src/memories.ts` and edit the text between the quotes.
 
 ## Adding photos and videos
-Drop files into `public/memories/` using these names (any of `.jpg`, `.png`, `.webp`, `.mp4`):
+Drop any photos and videos into `public/memories/`, with any names (`.jpg`, `.png`, `.webp`, `.mp4`, …).
 
-- `cube-1` … `cube-6`
-- `memory-01` … `memory-20`
-- `reel-1` … `reel-4`
-- `closing`
-
-Missing files show a soft placeholder tile, so the site always works.
-The cube photos, memory frames and reel clips are shuffled into a new order on every visit.
+On every visit the site shuffles them all and deals them out at random: up to 4 videos for the reel,
+a photo for the closing picture, 6 for the 3D cube, and everything else as "Our memories" frames.
+Until there are files, soft placeholder tiles are shown.
 
 ## Running it on a computer
 Needs [Node.js](https://nodejs.org) 20 or newer.

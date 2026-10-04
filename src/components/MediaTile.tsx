@@ -23,8 +23,8 @@ const GRADIENT = 'linear-gradient(135deg, #CFE3FF 0%, #FFFFFF 50%, #FFD3E4 100%)
 /**
  * Shows a photo or video from public/memories/.
  * - Photos load lazily and fade in.
- * - Videos show their poster (or a soft gradient) and only load once near the
- *   screen; they play muted and looped while visible and pause when not.
+ * - Videos show a soft gradient (then their first frame) and only load once near
+ *   the screen; they play muted and looped while visible and pause when not.
  * - If a file is missing (or fails), a soft gradient tile shows its file name.
  */
 export function MediaTile({
@@ -76,7 +76,6 @@ export function MediaTile({
         className={`${base} ${fitClass}`}
         style={{ background: GRADIENT }}
         src={near ? media.src! : undefined}
-        poster={media.poster ?? undefined}
         muted={muted}
         loop
         playsInline

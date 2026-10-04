@@ -3,11 +3,11 @@
  *  ALL THE WORDS ON THE SITE LIVE HERE.
  *  Change the text between the quotes and save — that's it.
  *
- *  Photos and videos go in the folder  public/memories/
- *  using the names written next to each item below
- *  (for example memory-01.jpg or reel-2.mp4).
- *  Allowed types: .jpg  .png  .webp  .mp4
- *  If a file is missing, a soft placeholder tile is shown instead.
+ *  Photos and videos: just put them in the folder  public/memories/
+ *  (any file names, .jpg .png .webp .mp4 …). On every visit the site
+ *  shuffles them all and deals them out at random: the cube, the memory
+ *  frames, the reel (videos) and the closing picture. Every file gets used.
+ *  Until there are files, soft placeholder tiles are shown instead.
  * ─────────────────────────────────────────────────────────────
  */
 
@@ -29,45 +29,17 @@ export const memories = {
     line: '[Placeholder] A little place to keep every moment of us.',
   },
 
-  // ── The 3D cube: one caption per face (files cube-1 … cube-6) ──
-  cube: [
-    { media: 'cube-1', caption: '[Placeholder] Cube caption one' },
-    { media: 'cube-2', caption: '[Placeholder] Cube caption two' },
-    { media: 'cube-3', caption: '[Placeholder] Cube caption three' },
-    { media: 'cube-4', caption: '[Placeholder] Cube caption four' },
-    { media: 'cube-5', caption: '[Placeholder] Cube caption five' },
-    { media: 'cube-6', caption: '[Placeholder] Cube caption six' },
+  // ── The 3D cube: when it opens into six cards, these lines appear
+  // under them (one per card spot; the photos themselves are random).
+  cubeCaptions: [
+    '[Placeholder] Caption one',
+    '[Placeholder] Caption two',
+    '[Placeholder] Caption three',
+    '[Placeholder] Caption four',
+    '[Placeholder] Caption five',
+    '[Placeholder] Caption six',
   ],
 
-  // ── Our memories: the frames you scroll past (files memory-01 … memory-20) ──
-  // Each frame is one photo or short video. Their order is shuffled on
-  // every visit. To add more frames, add more names here (memory-21 …).
-  memoryFrames: [
-    'memory-01',
-    'memory-02',
-    'memory-03',
-    'memory-04',
-    'memory-05',
-    'memory-06',
-    'memory-07',
-    'memory-08',
-    'memory-09',
-    'memory-10',
-    'memory-11',
-    'memory-12',
-    'memory-13',
-    'memory-14',
-    'memory-15',
-    'memory-16',
-    'memory-17',
-    'memory-18',
-    'memory-19',
-    'memory-20',
-  ],
-
-  // ── Moving pictures: short clips (files reel-1 … reel-4) ──
-  // Optional poster pictures: reel-1-poster.jpg etc. (shown until the clip loads).
-  reels: ['reel-1', 'reel-2', 'reel-3', 'reel-4'],
 
   // ── The little things ─────────────────────────────────────
   // One short line per card. Add or remove lines freely.
@@ -106,9 +78,8 @@ export const memories = {
     },
   },
 
-  // ── The very end (file: closing) ──────────────────────────
+  // ── The very end: the line under the closing picture ─────
   closing: {
-    media: 'closing',
     line: '[Placeholder] And this is only the beginning.',
   },
 }

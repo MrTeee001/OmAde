@@ -1,20 +1,25 @@
-import manifest from 'virtual:memories-manifest'
+import files from 'virtual:memories-manifest'
 
 export type MediaInfo = {
   name: string
   src: string | null
   kind: 'image' | 'video' | 'missing'
-  /** Optional still shown before a video loads: a file named "<name>-poster" (.jpg/.png/.webp). */
-  poster: string | null
 }
 
-const url = (file: string) => `${import.meta.env.BASE_URL}memories/${file}`
+const VIDEO = /\.(mp4|webm|m4v|mov)$/i
+const available = new Set(files)
 
-/** Finds the file for a media name like 'memory-01' in public/memories/. */
+/** Every photo and video in public/memories/, whatever their names. */
+export const allMedia = files
+export const isVideo = (file: string) => VIDEO.test(file)
+
+/**
+ * Looks up a file from public/memories/. Anything that isn't a real file
+ * (e.g. the word "photo" for an empty spot) comes back as 'missing', which
+ * shows a soft placeholder tile instead.
+ */
 export function getMedia(name: string): MediaInfo {
-  const file = manifest[name.toLowerCase()]
-  const posterFile = manifest[`${name.toLowerCase()}-poster`]
-  const poster = posterFile && !posterFile.toLowerCase().endsWith('.mp4') ? url(posterFile) : null
-  if (!file) return { name, src: null, kind: 'missing', poster: null }
-  return { name, src: url(file), kind: file.toLowerCase().endsWith('.mp4') ? 'video' : 'image', poster }
+  if (!available.has(name)) return { name, src: null, kind: 'missing' }
+  const src = `${import.meta.env.BASE_URL}memories/${encodeURIComponent(name)}`
+  return { name, src, kind: isVideo(name) ? 'video' : 'image' }
 }

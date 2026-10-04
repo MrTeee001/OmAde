@@ -3,33 +3,24 @@ import path from 'node:path'
 import type { Plugin } from 'vite'
 
 /**
- * Scans public/memories/ and exposes the files it finds as the virtual module
- * "virtual:memories-manifest" — a map from base name ("story-01") to the file
- * that exists ("story-01.webp"). This lets the site know which media is present
- * without a backend and without probing URLs at runtime.
+ * Scans public/memories/ and exposes every photo and video it finds (whatever
+ * their names) as the virtual module "virtual:memories-manifest": a plain list
+ * of file names. The site shuffles this pile on every visit and deals it out
+ * to the cube, the memory frames, the reel and the closing picture.
  */
 const VIRTUAL_ID = 'virtual:memories-manifest'
 const RESOLVED_ID = '\0' + VIRTUAL_ID
-const ALLOWED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.mp4'])
-// When several formats share a name, prefer them in this order.
-const PRIORITY = ['.webp', '.jpg', '.jpeg', '.png', '.mp4']
+const ALLOWED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.mp4', '.webm', '.m4v', '.mov'])
 
 export function memoriesManifest(): Plugin {
   let dir = ''
 
   const scan = () => {
-    const found: Record<string, string> = {}
-    if (!fs.existsSync(dir)) return found
-    for (const file of fs.readdirSync(dir)) {
-      const ext = path.extname(file).toLowerCase()
-      if (!ALLOWED.has(ext)) continue
-      const name = path.basename(file, path.extname(file)).toLowerCase()
-      const current = found[name]
-      if (!current || PRIORITY.indexOf(ext) < PRIORITY.indexOf(path.extname(current).toLowerCase())) {
-        found[name] = file
-      }
-    }
-    return found
+    if (!fs.existsSync(dir)) return []
+    return fs
+      .readdirSync(dir)
+      .filter((file) => !file.startsWith('.') && ALLOWED.has(path.extname(file).toLowerCase()))
+      .sort()
   }
 
   return {

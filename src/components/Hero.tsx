@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { memories } from '../memories'
-import { cubeFaces } from '../lib/order'
+import { cubeFaces } from '../lib/deal'
 import { Counter } from './Counter'
 import { Heart } from './Heart'
 import { Lightbox } from './Lightbox'
@@ -17,7 +17,7 @@ type Props = { withCube: boolean; lite: boolean; intro: boolean }
 
 export function Hero({ withCube, lite, intro }: Props) {
   const { names, hero, startDate } = memories
-  const items = cubeFaces // shuffled on every load, captions travel with their photos
+  const items = cubeFaces // dealt at random from all the photos/videos on every visit
 
   const sectionRef = useRef<HTMLElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
@@ -205,7 +205,7 @@ export function Hero({ withCube, lite, intro }: Props) {
             </button>
             <ul className="cube-grid-list grid">
               {items.map((item, i) => (
-                <li key={item.media} className="flex flex-col items-center">
+                <li key={i} className="flex flex-col items-center">
                   <button
                     type="button"
                     ref={(el) => void (stage.cards[i] = el)}
