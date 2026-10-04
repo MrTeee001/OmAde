@@ -1,0 +1,23 @@
+# Netlify build settings for the Ade & Omolade site.
+# Connect the GitHub repo in Netlify ("Add new site" → "Import an existing project")
+# and these settings are picked up automatically.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 needs Node 20.19+; the site is developed on Node 22.
+  NODE_VERSION = "22"
+
+# Keep the site out of search engines (backs up the noindex meta tag in index.html).
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+# Built JS/CSS/fonts have content hashes in their names, so they can be cached forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
