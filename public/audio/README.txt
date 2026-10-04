@@ -1,3 +1,3 @@
-Put the background song here (one file: .mp3, .m4a, .aac, .ogg or .wav).
-It plays softly from 0:37, carries on across reloads, and starts from 0:37
-again on a new visit. Until a file is here, the music button stays hidden.
+The background song (song.mp3). It plays softly from the beginning after the
+visitor's first tap, carries on across reloads, starts from the beginning again
+on a new visit, and loops. The Music button (bottom left) turns it off/on.

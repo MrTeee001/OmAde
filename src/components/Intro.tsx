@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import gsap from 'gsap'
+import { Physics2DPlugin } from 'gsap/Physics2DPlugin'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { memories } from '../memories'
 import { Heart } from './Heart'
@@ -20,7 +21,63 @@ import { heroReady } from '../lib/ready'
  *   4.3 – 5.75s  flaps open toward the camera, camera flies into the envelope
  */
 
+gsap.registerPlugin(Physics2DPlugin)
+
 const COLORS = ['#F58FB5', '#6FA8F5', '#FFFFFF']
+const RIBBON_COLORS = ['#F58FB5', '#6FA8F5', '#FFFFFF', '#FFC2D8', '#A9CBFA']
+
+// A few ribbon shapes: a curl, a wavy streamer and a little loop.
+const RIBBONS = [
+  '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 20c4-1 6-5 4-8s-6-1-4 3 8 5 11 1 1-9 4-11 5 0 5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  '<svg width="30" height="10" viewBox="0 0 30 10" fill="none"><path d="M2 5c3-4 6-4 9 0s6 4 9 0 6-4 8 0" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 16c0-7 11-7 11-1s-8 6-8 0 6-5 9-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+]
+
+/**
+ * Plenty of ribbons pouring all over the screen: half fountain up out of the
+ * envelope and drift down, half rain from the top across the whole width.
+ * They flutter as they fall (air resistance keeps them floaty, like confetti).
+ */
+function ribbonShower(layer: HTMLElement, x: number, y: number, width: number, count: number) {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  for (let i = 0; i < count; i++) {
+    const fromEnvelope = i % 2 === 0
+    const el = document.createElement('span')
+    el.className = 'burst-bit ribbon-bit'
+    el.style.color = RIBBON_COLORS[i % RIBBON_COLORS.length]
+    el.innerHTML = RIBBONS[i % RIBBONS.length]
+    layer.appendChild(el)
+
+    const duration = 2.0 + Math.random() * 0.25
+    const delay = Math.random() * 0.7 // a steady pour, not a single pop
+    const scale = 1 + Math.random() * 0.9
+    gsap.set(el, {
+      x: fromEnvelope ? x + (Math.random() - 0.5) * width * 0.8 : Math.random() * vw,
+      y: fromEnvelope ? y : -30 - Math.random() * 60,
+      xPercent: -50,
+      yPercent: -50,
+      scale,
+      rotation: Math.random() * 360,
+      opacity: 0,
+    })
+    const physics2D = fromEnvelope
+      ? { velocity: vh * (1.1 + Math.random() * 0.9), angle: -90 + (Math.random() - 0.5) * 160, gravity: vh * 1.3, friction: 0.035 }
+      : { velocity: vh * (0.15 + Math.random() * 0.25), angle: 90 + (Math.random() - 0.5) * 50, gravity: vh * 0.55, friction: 0.03 }
+    gsap
+      .timeline({ delay, onComplete: () => el.remove() })
+      .to(el, { opacity: 1, duration: 0.15, ease: 'sine.out' }, 0)
+      .to(el, {
+        physics2D,
+        rotation: `+=${(Math.random() < 0.5 ? -1 : 1) * (300 + Math.random() * 500)}`,
+        duration,
+        ease: 'none',
+      }, 0)
+      // Ribbons flip and flutter as they fall.
+      .to(el, { scaleX: scale * 0.25, duration: 0.2 + Math.random() * 0.2, ease: 'sine.inOut', yoyo: true, repeat: Math.round(duration / 0.32) }, 0.1)
+      .to(el, { opacity: 0, duration: 0.45, ease: 'sine.in' }, duration - 0.45)
+  }
+}
 
 /** Waits for the fonts the names use, but never longer than 2.5s. */
 function fontsReady() {
@@ -206,6 +263,10 @@ export function Intro({ onDone }: { onDone: () => void }) {
           .call(() => {
             const r = heart.getBoundingClientRect()
             burst(q('[data-burst]')[0], r.left + r.width / 2, r.top + r.height / 2, small)
+            // …and ribbons pour out of the envelope all over the screen.
+            const lite = document.documentElement.classList.contains('lite')
+            const count = small ? (lite ? 55 : 90) : lite ? 90 : 150
+            ribbonShower(q('[data-burst]')[0], er.left + er.width / 2, er.top + er.height * 0.1, er.width, count)
           }, [], 2.9)
           .to(parts.second, { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: 'back.out(1.7)' }, 2.95)
           .to(parts.heart, { scale: 1.2, duration: 0.14, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 3.3)

@@ -549,7 +549,7 @@ html.theme-fade, html.theme-fade * {
   letter-spacing: 0.02em;
   font-variation-settings: 'SOFT' 100, 'WONK' 0;
 }
-.site-logo-x { color: var(--color-rose); margin: 0 1px; font-size: 15px; }
+.site-logo-rose { margin: 0 3px; transform: translateY(-1px); filter: drop-shadow(0 1px 1.5px rgba(155, 11, 34, 0.25)); }
 .theme-toggle { width: 40px; cursor: pointer; }
 .site-logo:hover,
 .theme-toggle:hover { transform: translateY(-1px); }
@@ -684,6 +684,7 @@ html.theme-fade, html.theme-fade * {
   line-height: normal;
   font-variation-settings: 'SOFT' 100, 'WONK' 0;
 }
+.ribbon-bit { will-change: transform, opacity; }
 .burst-bit {
   position: absolute;
   left: 0;

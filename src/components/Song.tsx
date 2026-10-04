@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { songUrl } from '../lib/media'
 
-/** The song always starts here (seconds), and loops back here when it ends. */
-const START_AT = 37
+/** The song starts from the beginning (it was trimmed before it was added) and loops back to the start. */
+const START_AT = 0
 /** Soft background level (0–1). */
 const VOLUME = 0.18
 const FADE_IN = 2.5 // seconds
 
 // Remembered for this browser tab only, so a reload carries on where it was;
-// closing the tab (leaving the site) forgets it, and the next visit starts at 0:37.
+// closing the tab (leaving the site) forgets it, and the next visit starts from the beginning.
 const KEY_TIME = 'song-time'
 const KEY_OFF = 'song-off'
 const read = (key: string) => {
@@ -79,9 +79,9 @@ export function Song() {
       raf = requestAnimationFrame(step)
     }
 
-    // Where to begin: where it was before a reload, or 0:37.
+    // Where to begin: where it was before a reload, or the beginning.
     const saved = Number(read(KEY_TIME))
-    const startAt = Number.isFinite(saved) && saved >= START_AT ? saved : START_AT
+    const startAt = Number.isFinite(saved) && saved > START_AT ? saved : START_AT
     audio.addEventListener('loadedmetadata', () => {
       audio.currentTime = startAt < audio.duration - 1 ? startAt : START_AT
     }, { once: true })
@@ -120,7 +120,7 @@ export function Song() {
     const removeGestures = () => gestures.forEach((g) => window.removeEventListener(g, onGesture, true))
     gestures.forEach((g) => window.addEventListener(g, onGesture, true))
 
-    // Loop from 0:37, and keep note of the position for reloads.
+    // Loop back to the beginning, and keep note of the position for reloads.
     const onEnded = () => {
       audio.currentTime = START_AT
       audio.play().catch(() => {})
@@ -133,9 +133,9 @@ export function Song() {
         write(KEY_TIME, String(audio.currentTime))
       }
     }
-    // Only real playing positions are kept (never the 0 of a song that hasn't loaded).
+    // Only real playing positions are kept (never the 0 of a song that hasn't started).
     const onLeave = () => {
-      if (audio.currentTime >= START_AT) write(KEY_TIME, String(audio.currentTime))
+      if (playing && audio.currentTime > START_AT) write(KEY_TIME, String(audio.currentTime))
     }
     audio.addEventListener('ended', onEnded)
     audio.addEventListener('timeupdate', onTime)
