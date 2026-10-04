@@ -26,20 +26,10 @@ export const memories = {
   // ── Top of the page ───────────────────────────────────────
   hero: {
     label: 'Our memories',
-    // One short line under your names.
-    line: '[Placeholder] A little place to keep every moment of us.',
+    // An optional short line under your names. Leave it as '' to show nothing.
+    line: '',
   },
 
-  // ── The 3D cube: when it opens into six cards, these lines appear
-  // under them (one per card spot; the photos themselves are random).
-  cubeCaptions: [
-    '[Placeholder] Caption one',
-    '[Placeholder] Caption two',
-    '[Placeholder] Caption three',
-    '[Placeholder] Caption four',
-    '[Placeholder] Caption five',
-    '[Placeholder] Caption six',
-  ],
 
 
   // ── The little things ─────────────────────────────────────
@@ -47,17 +37,17 @@ export const memories = {
   loveLines: {
     // Ade writing about Omolade (shown in blue)
     adeOnOmolade: [
-      '[Placeholder] The way you laugh at your own jokes first.',
-      '[Placeholder] How you remember every small thing I say.',
-      '[Placeholder] Your voice notes that start with a sigh.',
-      '[Placeholder] How calm everything feels when you are near.',
+      'I love your laughter, oh my God, I love making you laugh',
+      'I love how you are intentional about me',
+      'I love when you call me just because you want to sleep',
+      'I love how you do like my big sis, ehn small madam',
     ],
     // Omolade writing about Ade (shown in rose)
     omoladeOnAde: [
-      '[Placeholder] How you always walk on the outside of the road.',
-      '[Placeholder] The face you make when you are thinking.',
-      '[Placeholder] That you never let me end a day sad.',
-      '[Placeholder] How you say my full name, slowly.',
+      'The way you hold my hands',
+      'The way you make me feel loved and comfortable 🥰',
+      'I love that you can cook because who doesn’t want a fine man that can also feed her? 🤭',
+      'The way you check up on me and your compliments too',
     ],
   },
 
@@ -65,23 +55,27 @@ export const memories = {
   // The greeting ("Omolade," / "Ade,") and the sign-off ("Yours, Ade" /
   // "Yours, Omolade") are added automatically. Each paragraph is its own item.
   letters: {
+    // Ade's letter to Omolade
     fromAde: {
       paragraphs: [
-        '[Placeholder] Ade’s letter to Omolade. Write the first paragraph here.',
-        '[Placeholder] Then a second paragraph, as long or as short as you like.',
+        'Loving you feels like having a little piece of home in a person, and I hope you never forget how deeply precious you are to me.',
+        'I want to love you, softly, loudly, on the easy days, on the hard ones, and in all the little moments in between and if there’s one thing I’m sure of, it’s that I want to keep choosing you, growing with you, annoying you 😝 and loving you properly through every version of us.',
+        '❤️',
       ],
     },
+    // Omolade's letter to Ade
     fromOmolade: {
       paragraphs: [
-        '[Placeholder] Omolade’s letter to Ade. Write the first paragraph here.',
-        '[Placeholder] Then a second paragraph, as long or as short as you like.',
+        'There are so many little things about you that I love. I love how you make me laugh (even if I don’t admit it 😝), how you care about me, how you can be so annoying and still make me want you around 😂❤️, and of course the fact that you can actually cook (even remain groom price 😂). But beyond all of that, I just love the way being with you feels. You’ve become such a special part of my life (I wasn’t even expecting it 😂), and I’m genuinely grateful for every moment we share.',
+        'I love you, Ade. I love who you are, and I love the person you’re becoming 😌. I want to keep growing with you, laughing with you, annoying you and making beautiful memories together. You’re my baby boy, Mr Babe, and I hope you never forget how much you mean to me. ❤️',
       ],
     },
   },
 
-  // ── The very end: the line under the closing picture ─────
+  // ── The very end: an optional line under the closing picture.
+  // Leave it as '' to show nothing.
   closing: {
-    line: '[Placeholder] And this is only the beginning.',
+    line: '',
   },
 }
 

@@ -7,6 +7,16 @@
     <meta name="googlebot" content="noindex, nofollow" />
     <meta name="theme-color" content="#FBF9FA" />
     <title>Ade &amp; Omolade</title>
+    <script>
+      // Day or night before the first paint: the visitor's last choice, else their device setting.
+      ;(function () {
+        var t = null
+        try { t = localStorage.getItem('theme') } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', t)
+        if (t === 'dark') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0D0F1E')
+      })()
+    </script>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23F58FB5' d='M12 21s-7.5-4.6-9.5-9.2C1.1 8.4 3.3 5 6.8 5c2 0 3.4 1.1 4.2 2.4h2C13.8 6.1 15.2 5 17.2 5c3.5 0 5.7 3.4 4.3 6.8C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E" />
   </head>
   <body>

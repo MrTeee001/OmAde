@@ -29,6 +29,8 @@ const FOV = 30
 const CAMERA_Z = 10
 const FACE_INSET = 0.95 // photo size relative to the cube; the white rounded body shows around it
 const BODY_RADIUS = 0.06
+const BODY_DAY = '#fdfcff'
+const BODY_NIGHT = '#c9c5dc'
 
 // Resting behaviour.
 const SLANT_FORWARD = THREE.MathUtils.degToRad(25) // tipped toward the viewer, so the top shows
@@ -75,6 +77,17 @@ function Scene({ stage, active, lite }: Props) {
   const bodyRef = useRef<THREE.Mesh>(null)
   const shadowRef = useRef<THREE.Mesh>(null)
   const shadowTexture = useShadowTexture()
+
+  // The cube's white body turns a soft pearl in dark mode (so it doesn't glare).
+  const bodyMat = useRef<THREE.MeshStandardMaterial>(null)
+  useEffect(() => {
+    const apply = () =>
+      bodyMat.current?.color.set(document.documentElement.getAttribute('data-theme') === 'dark' ? BODY_NIGHT : BODY_DAY)
+    apply()
+    const obs = new MutationObserver(apply)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
 
   // One material + texture per face.
   const faces = useMemo(
@@ -227,7 +240,7 @@ function Scene({ stage, active, lite }: Props) {
     const mobile = vw < 768
     // A slanted cube looks about 1.35× wider than its edge, so size the edge
     // to make its outline fill the slot (≈380px desktop, 240px mobile).
-    const restPx = slot.width * (mobile ? 0.7 : 0.74)
+    const restPx = slot.width * (mobile ? 0.66 : 0.74)
     const centrePx = mobile ? Math.min(vw * 0.52, 240) : restPx * 1.12
 
     const glide = ease(range(p, PHASES.glide))
@@ -355,7 +368,7 @@ function Scene({ stage, active, lite }: Props) {
         <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
       </mesh>
       <RoundedBox ref={bodyRef} args={[1, 1, 1]} radius={BODY_RADIUS} smoothness={lite ? 3 : 5}>
-        <meshStandardMaterial color="#fdfcff" roughness={0.55} metalness={0} />
+        <meshStandardMaterial ref={bodyMat} color={BODY_DAY} roughness={0.55} metalness={0} />
       </RoundedBox>
       {faces.map((f, i) => (
         <mesh key={i} ref={(m) => void (faceRefs.current[i] = m)} material={f.material}>

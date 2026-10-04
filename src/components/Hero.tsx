@@ -6,7 +6,7 @@ import { cubeFaces } from '../lib/deal'
 import { Counter } from './Counter'
 import { Heart } from './Heart'
 import { Lightbox } from './Lightbox'
-import { createStage, OPEN_DURATION, PHASES } from './cube/stage'
+import { createStage, OPEN_DURATION } from './cube/stage'
 import { heroReady, markHeroReady } from '../lib/ready'
 import { glideTo } from '../lib/scroll'
 
@@ -64,13 +64,6 @@ export function Hero({ withCube, lite, intro }: Props) {
       // The rest of the hero dims softly while the cube takes the stage.
       tl.to(textRef.current, { opacity: 0.1, duration: 0.22, ease: 'sine.inOut' }, 0)
         .to([hintRef.current, tapRef.current], { opacity: 0, duration: 0.06 }, 0)
-        // Captions fade in under the cards, one after another.
-        .fromTo(
-          grid.querySelectorAll('[data-caption]'),
-          { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.06, stagger: 0.025 },
-          PHASES.captions,
-        )
         .set({}, {}, 1) // the timeline always spans exactly 0 → 1
     }, section)
 
@@ -136,9 +129,11 @@ export function Hero({ withCube, lite, intro }: Props) {
             </span>
           </h1>
 
-          <p className="mt-6 max-w-[34ch] text-ink-soft" data-intro-fade>
-            {hero.line}
-          </p>
+          {hero.line && (
+            <p className="mt-6 max-w-[34ch] text-ink-soft" data-intro-fade>
+              {hero.line}
+            </p>
+          )}
 
           {/* data-late: fades in once the opening sequence has finished. */}
           <div className="mt-10 md:mt-16" data-late>
@@ -204,22 +199,19 @@ export function Hero({ withCube, lite, intro }: Props) {
               <span className="label !text-ink">Close</span>
             </button>
             <ul className="cube-grid-list grid">
-              {items.map((item, i) => (
+              {items.map((_, i) => (
                 <li key={i} className="flex flex-col items-center">
                   <button
                     type="button"
                     ref={(el) => void (stage.cards[i] = el)}
                     className="card-spot aspect-square w-full"
-                    aria-label={`Open: ${item.caption}`}
+                    aria-label={`Open memory ${i + 1}`}
                     onClick={() => setOpen(i)}
                     onPointerEnter={() => (stage.hover = i)}
                     onPointerLeave={() => (stage.hover = -1)}
                     onFocus={() => (stage.hover = i)}
                     onBlur={() => (stage.hover = -1)}
                   />
-                  <p data-caption className="cube-caption mt-3 text-center text-ink-soft">
-                    {item.caption}
-                  </p>
                 </li>
               ))}
             </ul>

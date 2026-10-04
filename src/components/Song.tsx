@@ -87,7 +87,6 @@ export function Song() {
     }, { once: true })
 
     let playing = false
-    let ducked = false
     const start = (fromTap = false) => {
       if (playing || read(KEY_OFF) === '1') return
       if (fromTap) {
@@ -98,7 +97,7 @@ export function Song() {
         .play()
         .then(() => {
           playing = true
-          fadeTo(ducked ? 0 : VOLUME, FADE_IN)
+          fadeTo(VOLUME, FADE_IN)
           removeGestures()
         })
         .catch(() => {
@@ -142,19 +141,12 @@ export function Song() {
     audio.addEventListener('timeupdate', onTime)
     window.addEventListener('pagehide', onLeave)
 
-    // Go quiet while a clip in "Moving pictures" is playing with its own sound.
-    const onClipSound = (e: Event) => {
-      ducked = (e as CustomEvent<boolean>).detail
-      if (playing) fadeTo(ducked ? 0 : VOLUME, 0.8)
-    }
-    window.addEventListener('memories:clip-sound', onClipSound)
 
     start() // some browsers allow it straight away (without a tap)
 
     return () => {
       removeGestures()
       window.removeEventListener('pagehide', onLeave)
-      window.removeEventListener('memories:clip-sound', onClipSound)
       audio.removeEventListener('ended', onEnded)
       audio.removeEventListener('timeupdate', onTime)
       onLeave()

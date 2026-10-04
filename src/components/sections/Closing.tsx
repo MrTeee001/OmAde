@@ -15,23 +15,21 @@ export function Closing() {
     <>
       <section className="shell section-gap" aria-label="Closing">
         <div data-reveal>
-          {/* Always the same picture (our feet), framed wide on desktop and square on phones.
+          {/* Always the same picture (our feet), zoomed out to show the whole crossing.
               It lives in public/closing/, outside the shuffled pile. */}
-          <picture>
-            <source media="(min-width: 768px)" srcSet={`${import.meta.env.BASE_URL}closing/closing-wide.jpg`} />
-            <img
-              src={`${import.meta.env.BASE_URL}closing/closing-square.jpg`}
-              alt="Our feet side by side on a zebra crossing"
-              loading="lazy"
-              decoding="async"
-              className="aspect-square w-full rounded-[24px] border border-white object-cover shadow-[0_8px_30px_rgba(111,168,245,0.12)] md:aspect-[16/9]"
-              style={{ background: 'linear-gradient(135deg, #CFE3FF 0%, #FFFFFF 50%, #FFD3E4 100%)' }}
-            />
-          </picture>
+          <img
+            src={`${import.meta.env.BASE_URL}closing/closing.jpg`}
+            alt="Our feet side by side on a zebra crossing"
+            loading="lazy"
+            decoding="async"
+            className="closing-photo mx-auto block aspect-[4/5] w-full max-w-[560px] rounded-[24px] soft-border object-cover"
+          />
         </div>
-        <p className="mx-auto mt-10 max-w-[28ch] text-center font-display text-[28px] italic leading-snug text-ink md:mt-14 md:text-[40px]" data-reveal>
-          {closing.line}
-        </p>
+        {closing.line && (
+          <p className="mx-auto mt-10 max-w-[28ch] text-center font-display text-[28px] italic leading-snug text-ink md:mt-14 md:text-[40px]" data-reveal>
+            {closing.line}
+          </p>
+        )}
       </section>
       <footer className="shell pb-12 pt-24 text-center md:pt-32">
         <p className="label">

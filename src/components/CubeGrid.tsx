@@ -17,11 +17,10 @@ export function CubeGrid() {
               type="button"
               onClick={() => setOpen(i)}
               className="card-button block w-full"
-              aria-label={`Open: ${item.caption}`}
+              aria-label={`Open memory ${i + 1}`}
             >
-              <MediaTile name={item.media} alt={item.caption} className="aspect-square w-full border border-white shadow-[0_8px_30px_rgba(111,168,245,0.12)]" />
+              <MediaTile name={item.media} className="aspect-square w-full soft-frame" />
             </button>
-            <p className="mt-3 text-center text-[15px] leading-snug text-ink-soft">{item.caption}</p>
           </li>
         ))}
       </ul>

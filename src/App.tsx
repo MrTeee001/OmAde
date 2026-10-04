@@ -12,6 +12,7 @@ import { Reel } from './components/sections/Reel'
 import { Letters } from './components/sections/Letters'
 import { Closing } from './components/sections/Closing'
 import { Song } from './components/Song'
+import { Header } from './components/Header'
 import { CubeGrid } from './components/CubeGrid'
 import { prefersReducedMotion } from './lib/motion'
 import { hasWebGL, isLiteDevice } from './lib/device'
@@ -93,6 +94,7 @@ export default function App() {
   return (
     <>
       {intro && <Intro onDone={endIntro} />}
+      <Header />
       <Song />
       <Background />
       <FloatingHearts />

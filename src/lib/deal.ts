@@ -1,4 +1,3 @@
-import { memories } from '../memories'
 import { allMedia, isVideo } from './media'
 
 /** A fresh random order (Fisher–Yates shuffle). */
@@ -41,9 +40,6 @@ const cube = take(pile, 6)
 const frames = pile
 
 export const reelClips: string[] = empty ? Array(4).fill(VIDEO) : reel
-/** The six cube faces; captions belong to the card spots, not to particular photos. */
-export const cubeFaces = memories.cubeCaptions.slice(0, 6).map((caption, i) => ({
-  media: cube[i] ?? PHOTO,
-  caption,
-}))
+/** The six cube faces (photos or videos, no captions). */
+export const cubeFaces = Array.from({ length: 6 }, (_, i) => ({ media: cube[i] ?? PHOTO }))
 export const memoryFrames: string[] = empty ? Array(20).fill(PHOTO) : frames

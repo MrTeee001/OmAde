@@ -9,4 +9,4 @@ On every visit the site shuffles all of them and deals them out at random:
   - every remaining file becomes a frame in "Our memories"
 Every file gets used. Until there are files, soft placeholder tiles show.
 
-The closing picture never changes: it is public/closing/ (a wide and a square crop).
+The closing picture never changes: it is public/closing/closing.jpg.

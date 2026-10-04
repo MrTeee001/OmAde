@@ -44,8 +44,8 @@ export function Background() {
         <div className="field field-c bg-baby-blue" style={{ width: '48vmax', height: '48vmax', top: '-10vmax', right: '-20vmax', opacity: 0.6 }} />
       </div>
 
-      {/* White — a gentle bright patch that wanders through the middle */}
-      <div className="field field-b bg-white" style={{ width: '55vmax', height: '55vmax', top: '15vh', left: '20vw', opacity: 0.85 }} />
+      {/* The bright patch that wanders through the middle (white by day, deep indigo at night) */}
+      <div className="field field-b bg-glow" style={{ width: '55vmax', height: '55vmax', top: '15vh', left: '20vw', opacity: 0.85 }} />
 
       {/* Pink — grows as you reach the bottom of the page */}
       <div className="absolute inset-0" style={{ opacity: 'calc(0.35 + var(--p) * 0.65)' }}>

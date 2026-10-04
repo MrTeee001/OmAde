@@ -287,13 +287,13 @@ export function Intro({ onDone }: { onDone: () => void }) {
       <svg width="0" height="0" className="absolute" aria-hidden="true">
         <defs>
           <linearGradient id="env-out" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#FFE9F1" />
-            <stop offset="0.5" stopColor="#FFFDFB" />
-            <stop offset="1" stopColor="#EAF2FF" />
+            <stop offset="0" stopColor="var(--env-out-1)" />
+            <stop offset="0.5" stopColor="var(--env-out-2)" />
+            <stop offset="1" stopColor="var(--env-out-3)" />
           </linearGradient>
           <linearGradient id="env-in" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#F6E6EE" />
-            <stop offset="1" stopColor="#ECF0FB" />
+            <stop offset="0" stopColor="var(--env-in-1)" />
+            <stop offset="1" stopColor="var(--env-in-2)" />
           </linearGradient>
         </defs>
       </svg>
@@ -338,10 +338,10 @@ function EnvelopePanel({ side, children }: { side: keyof typeof PANELS; children
   return (
     <div data-panel={side} className={`env-panel env-panel-${side}`}>
       <svg className="panel-face" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <polygon points={shape.out} fill="url(#env-out)" stroke="#fff" strokeWidth="1.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <polygon points={shape.out} fill="url(#env-out)" stroke="var(--env-edge)" strokeWidth="1.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
       </svg>
       <svg className="panel-face" style={{ transform: shape.flip }} viewBox="0 0 100 100" preserveAspectRatio="none">
-        <polygon points={shape.in} fill="url(#env-in)" stroke="#fff" strokeWidth="1" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <polygon points={shape.in} fill="url(#env-in)" stroke="var(--env-edge)" strokeWidth="1" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
       </svg>
       {children}
     </div>

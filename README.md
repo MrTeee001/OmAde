@@ -21,4 +21,4 @@ npm run dev      # live preview at http://localhost:5173
 npm run build    # finished site in the dist/ folder, ready to upload
 ```
 
-The closing picture never changes: it is public/closing/ (a wide and a square crop).
+The closing picture never changes: it is public/closing/closing.jpg.

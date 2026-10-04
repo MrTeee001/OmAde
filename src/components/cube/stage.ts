@@ -24,7 +24,6 @@ export const PHASES = {
   glide: [0, 0.25], // spin eases to a stop, cube glides to the centre, hero dims
   separate: [0.2, 0.6], // faces drift apart in 3D and turn to the viewer
   settle: [0.55, 0.92], // faces land in the grid as rounded cards
-  captions: 0.8, // captions fade in one after another from here
 } as const
 
 /** How long a click takes to open (or close) the memories, in seconds. */

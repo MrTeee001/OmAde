@@ -87,7 +87,7 @@ export function Memories() {
                 <li key={i} data-story-entry data-tilt={tilt} className={`story-entry story-entry-${side}`}>
                   <span data-story-dot className="story-dot" aria-hidden="true" />
                   <div data-story-photo className="story-photo">
-                    <MediaTile name={name} alt={`A memory (${i + 1} of ${memoryFrames.length})`} className="aspect-[4/5] w-full border border-white shadow-[0_8px_30px_rgba(111,168,245,0.12)]" />
+                    <MediaTile name={name} alt={`A memory (${i + 1} of ${memoryFrames.length})`} className="aspect-[4/5] w-full soft-frame" />
                   </div>
                 </li>
               )

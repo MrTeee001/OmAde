@@ -16,6 +16,78 @@
   --shadow-card: 0 8px 30px rgba(111, 168, 245, 0.12);
 }
 
+
+/* ── Theme colours ───────────────────────────────────────────
+   Light ("day") values here; the dark ("night") set below swaps the white
+   for a deep gradient. Chosen with the toggle at the top right, or follows
+   the device setting until then. */
+:root {
+  --color-glow: #ffffff; /* the bright patch in the drifting background */
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --surface-border: #ffffff;
+  --shadow-soft: 0 8px 30px rgba(111, 168, 245, 0.12);
+  --shadow-lift: 0 14px 36px rgba(111, 168, 245, 0.2);
+  --placeholder: linear-gradient(135deg, #cfe3ff 0%, #ffffff 50%, #ffd3e4 100%);
+  --backdrop: rgba(251, 249, 250, 0.72);
+  --track: rgba(111, 168, 245, 0.16);
+  --tint-blue: rgba(207, 227, 255, 0.55);
+  --tint-rose: rgba(255, 211, 228, 0.6);
+  --paper: #fffefc;
+  --paper-rule: rgba(111, 168, 245, 0.16);
+  --paper-margin: rgba(245, 143, 181, 0.35);
+  --env-inside: linear-gradient(160deg, #f8e9f0 0%, #fbf7f9 55%, #e7effd 100%);
+  --env-out-1: #ffe9f1;
+  --env-out-2: #fffdfb;
+  --env-out-3: #eaf2ff;
+  --env-in-1: #f6e6ee;
+  --env-in-2: #ecf0fb;
+  --env-edge: #ffffff;
+  --floor-shadow: rgba(91, 96, 120, 0.22);
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  --color-base: #0d0f1e;
+  --color-ink: #f3eef8;
+  --color-ink-soft: #a9aec9;
+  --color-sky: #82b4fb;
+  --color-baby-blue: #1b2b5a; /* deep blue field */
+  --color-blush: #4a1f45; /* deep plum-rose field */
+  --color-glow: #262a52; /* the "white" patch becomes a soft indigo glow */
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-strong: rgba(255, 255, 255, 0.12);
+  --surface-border: rgba(255, 255, 255, 0.12);
+  --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --placeholder: linear-gradient(135deg, #1d2a52 0%, #23264a 50%, #3e2142 100%);
+  --backdrop: rgba(13, 15, 30, 0.78);
+  --track: rgba(130, 180, 251, 0.18);
+  --tint-blue: rgba(111, 168, 245, 0.16);
+  --tint-rose: rgba(245, 143, 181, 0.16);
+  --paper: #171a30;
+  --paper-rule: rgba(130, 180, 251, 0.13);
+  --paper-margin: rgba(245, 143, 181, 0.32);
+  --env-inside: linear-gradient(160deg, #3a2343 0%, #1f2340 55%, #1d2b52 100%);
+  --env-out-1: #3b2546;
+  --env-out-2: #24284a;
+  --env-out-3: #1e2c55;
+  --env-in-1: #2c1f3c;
+  --env-in-2: #1b2444;
+  --env-edge: rgba(255, 255, 255, 0.22);
+  --floor-shadow: rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+/* Smooth day ↔ night change. */
+html.theme-fade, html.theme-fade * {
+  transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease !important;
+}
+
+/* Shared frames for photos/cards (follow the theme). */
+.soft-border { border: 1px solid var(--surface-border); }
+.soft-frame { border: 1px solid var(--surface-border); box-shadow: var(--shadow-soft); }
+.surface-pill { background: var(--surface-strong); }
+.bg-glow { background: var(--color-glow); }
+
 @layer base {
   html {
     background: var(--color-base);
@@ -84,8 +156,8 @@
     }
   }
   .card {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid #ffffff;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
     backdrop-filter: blur(12px);
@@ -146,7 +218,7 @@
   border-radius: 24px;
   outline: none;
 }
-.cube-slot:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-rose); }
+.cube-slot:focus-visible { box-shadow: 0 0 0 2px var(--surface-border), 0 0 0 4px var(--color-rose); }
 /* "Tap to open": fades in on hover; always softly shown on touch screens. */
 .cube-tap {
   position: absolute;
@@ -157,7 +229,7 @@
   pointer-events: none;
 }
 @media (max-width: 767px) {
-  .cube-tap { top: calc(100% + 18px); }
+  .cube-tap { top: calc(100% + 26px); }
 }
 .cube-tap-label {
   display: block;
@@ -173,7 +245,7 @@
 .intro .cube-tap-label { opacity: 0; }
 .cube-close {
   position: absolute;
-  top: max(20px, env(safe-area-inset-top));
+  top: calc(max(16px, env(safe-area-inset-top)) + 52px); /* just below the day/night toggle */
   right: 20px;
   z-index: 25; /* above the 3D layer */
   opacity: 0;
@@ -207,27 +279,17 @@
   cursor: zoom-in;
   outline: none;
   transition: box-shadow 0.4s ease;
-  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+  box-shadow: var(--shadow-soft);
 }
-.card-spot:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--color-rose); }
-.cube-caption {
-  font-size: 14px;
-  line-height: 1.4;
-  max-width: 100%;
-  min-height: 2.8em;
-  opacity: 0;
-}
-@media (min-width: 768px) {
-  .cube-caption { font-size: 15px; }
-}
+.card-spot:focus-visible { box-shadow: 0 0 0 3px var(--surface-border), 0 0 0 5px var(--color-rose); }
 
 /* Simple grid (reduced motion) buttons */
 .card-button { border-radius: 24px; cursor: zoom-in; outline: none; }
-.card-button:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--color-rose); }
+.card-button:focus-visible { box-shadow: 0 0 0 3px var(--surface-border), 0 0 0 5px var(--color-rose); }
 
 /* ── Lightbox ─────────────────────────────────────────────── */
 .lightbox {
-  background: rgba(251, 249, 250, 0.72);
+  background: var(--backdrop);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   opacity: 0;
@@ -247,14 +309,14 @@
   height: 44px;
   padding: 0 16px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #fff;
-  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-soft);
   color: var(--color-ink);
   cursor: pointer;
   transition: background 0.25s ease;
 }
-.pill-button:hover { background: #fff; }
+.pill-button:hover { background: var(--surface-strong); }
 .pill-button:focus-visible { outline: 2px solid var(--color-rose); outline-offset: 2px; }
 
 /* ── Small or slow devices: calmer background ─────────────── */
@@ -280,7 +342,7 @@
   left: 11px; /* mobile: line on the left */
   width: 2px;
   border-radius: 2px;
-  background: rgba(111, 168, 245, 0.16);
+  background: var(--track);
 }
 .story-line {
   position: absolute;
@@ -315,9 +377,9 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-base);
   border: 2px solid var(--color-rose);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 4px var(--surface);
 }
 .story-photo {
   will-change: transform;
@@ -357,9 +419,9 @@
   height: 100%;
   padding: 20px 18px 18px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #fff;
-  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-soft);
   font-size: 15px;
   line-height: 1.5;
   color: var(--color-ink);
@@ -367,13 +429,13 @@
 }
 .little-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 14px 36px rgba(111, 168, 245, 0.2);
+  box-shadow: var(--shadow-lift);
 }
 .little-heart { display: block; margin-bottom: 10px; }
 .tone-blue .little-heart, .tone-blue-text { color: var(--color-sky) !important; }
 .tone-rose .little-heart, .tone-rose-text { color: var(--color-rose) !important; }
-.tone-blue { background-image: linear-gradient(160deg, rgba(207, 227, 255, 0.55), rgba(255, 255, 255, 0) 55%); }
-.tone-rose { background-image: linear-gradient(160deg, rgba(255, 211, 228, 0.6), rgba(255, 255, 255, 0) 55%); }
+.tone-blue { background-image: linear-gradient(160deg, var(--tint-blue), transparent 55%); }
+.tone-rose { background-image: linear-gradient(160deg, var(--tint-rose), transparent 55%); }
 @media (min-width: 768px) {
   .little-card { font-size: 16px; padding: 22px 20px 20px; }
 }
@@ -401,21 +463,6 @@
   padding-bottom: 12px;
 }
 .reel-row-scroll .reel-card { scroll-snap-align: center; }
-.reel-sound {
-  position: absolute;
-  left: 50%;
-  bottom: 14px;
-  transform: translateX(-50%);
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid #fff;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  white-space: nowrap;
-  cursor: pointer;
-}
-.reel-sound:focus-visible { outline: 2px solid var(--color-rose); outline-offset: 2px; }
 
 /* ── The letters ─────────────────────────────────────────── */
 .letters {
@@ -433,14 +480,14 @@
   max-width: 520px;
   padding: 44px 32px 40px 48px;
   border-radius: 18px;
-  border: 1px solid #fff;
+  border: 1px solid var(--surface-border);
   /* Notepaper: faint blue rules, a soft pink margin line, warm white paper. */
   background:
-    linear-gradient(90deg, transparent 31px, rgba(245, 143, 181, 0.35) 31px, rgba(245, 143, 181, 0.35) 32px, transparent 32px),
-    repeating-linear-gradient(180deg, transparent 0, transparent calc(var(--rule) - 1px), rgba(111, 168, 245, 0.16) calc(var(--rule) - 1px), rgba(111, 168, 245, 0.16) var(--rule)),
-    #fffefc;
+    linear-gradient(90deg, transparent 31px, var(--paper-margin) 31px, var(--paper-margin) 32px, transparent 32px),
+    repeating-linear-gradient(180deg, transparent 0, transparent calc(var(--rule) - 1px), var(--paper-rule) calc(var(--rule) - 1px), var(--paper-rule) var(--rule)),
+    var(--paper);
   background-position: 0 0, 0 37px, 0 0; /* rules sit just under each line of text */
-  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+  box-shadow: var(--shadow-soft);
   font-family: var(--font-display);
   font-size: 18px;
   line-height: var(--rule);
@@ -466,6 +513,52 @@
   .letter-card { padding: 40px 22px 36px 44px; font-size: 17px; }
 }
 
+/* ── Header: AxO logo (top left) + day/night toggle (top right) ── */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  pointer-events: none; /* only the two controls catch taps */
+}
+.site-header > * { pointer-events: auto; }
+.intro .site-header > * { pointer-events: none; }
+.site-logo,
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--color-ink);
+  transition: transform 0.3s ease;
+}
+.site-logo {
+  padding: 0 16px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  font-variation-settings: 'SOFT' 100, 'WONK' 0;
+}
+.site-logo-x { color: var(--color-rose); margin: 0 1px; font-size: 15px; }
+.theme-toggle { width: 40px; cursor: pointer; }
+.site-logo:hover,
+.theme-toggle:hover { transform: translateY(-1px); }
+.site-logo:focus-visible,
+.theme-toggle:focus-visible { outline: 2px solid var(--color-rose); outline-offset: 2px; }
+@media (min-width: 768px) {
+  .site-header { padding: 24px 28px 0; }
+}
+
 /* ── Music button ─────────────────────────────────────────── */
 .song-toggle {
   position: fixed;
@@ -478,9 +571,9 @@
   height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid #fff;
-  box-shadow: 0 8px 30px rgba(111, 168, 245, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-soft);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: var(--color-rose);
@@ -528,9 +621,9 @@
   inset: 0;
   border-radius: 16px;
   /* The inside of the envelope: what the camera flies into. */
-  background: linear-gradient(160deg, #f8e9f0 0%, #fbf7f9 55%, #e7effd 100%);
-  border: 1px solid #fff;
-  box-shadow: 0 10px 30px rgba(111, 168, 245, 0.12);
+  background: var(--env-inside);
+  border: 1px solid var(--env-edge);
+  box-shadow: var(--shadow-soft);
 }
 .env-panel {
   position: absolute;
@@ -574,7 +667,7 @@
   top: calc(100% + 18px);
   height: 34px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(91, 96, 120, 0.22), rgba(111, 168, 245, 0.08) 60%, transparent);
+  background: radial-gradient(closest-side, var(--floor-shadow), rgba(111, 168, 245, 0.08) 60%, transparent);
   filter: blur(8px);
   transform: translateZ(-2px);
 }

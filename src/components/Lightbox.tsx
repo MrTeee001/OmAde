@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MediaTile } from './MediaTile'
 import { pauseScroll, resumeScroll } from '../lib/scroll'
 
-export type LightboxItem = { media: string; caption: string }
+export type LightboxItem = { media: string }
 
 type Props = {
   items: LightboxItem[]
@@ -11,7 +11,7 @@ type Props = {
   onChange: (index: number) => void
 }
 
-/** A photo or video shown large, with its caption. Esc or the backdrop closes it. */
+/** A photo or video shown large. Esc or the backdrop closes it. */
 export function Lightbox({ items, index, onClose, onChange }: Props) {
   const open = index !== null
   const [shown, setShown] = useState(false)
@@ -52,7 +52,7 @@ export function Lightbox({ items, index, onClose, onChange }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={item.caption}
+      aria-label={`Memory ${index + 1} of ${items.length}`}
       className={`lightbox fixed inset-0 z-50 flex items-center justify-center px-4 py-16 sm:px-6 ${shown ? 'is-shown' : ''}`}
       onClick={onClose}
     >
@@ -60,13 +60,11 @@ export function Lightbox({ items, index, onClose, onChange }: Props) {
         <MediaTile
           key={item.media}
           name={item.media}
-          alt={item.caption}
+          alt=""
           fit="contain"
-          controls
-          className="h-auto max-h-[70svh] w-auto max-w-full border border-white shadow-[0_8px_30px_rgba(111,168,245,0.12)]"
+          className="h-auto max-h-[70svh] w-auto max-w-full soft-frame"
           placeholderClassName="aspect-square w-[min(100%,70svh)]"
         />
-        <p className="mt-6 text-center font-display text-[22px] italic leading-snug text-ink sm:text-[26px]">{item.caption}</p>
         <div className="mt-6 flex items-center gap-2">
           <button type="button" className="pill-button" onClick={() => onChange((index - 1 + items.length) % items.length)} aria-label="Previous">
             ←

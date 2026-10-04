@@ -14,10 +14,12 @@ function drawPlaceholder(name: string | null, size: number): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = size
   const ctx = canvas.getContext('2d')!
+  // Day: baby blue → white → blush. Night: deep blue → indigo → plum.
+  const night = document.documentElement.getAttribute('data-theme') === 'dark'
   const g = ctx.createLinearGradient(0, 0, size, size)
-  g.addColorStop(0, '#CFE3FF')
-  g.addColorStop(0.5, '#FFFFFF')
-  g.addColorStop(1, '#FFD3E4')
+  g.addColorStop(0, night ? '#1D2A52' : '#CFE3FF')
+  g.addColorStop(0.5, night ? '#23264A' : '#FFFFFF')
+  g.addColorStop(1, night ? '#3E2142' : '#FFD3E4')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, size, size)
   if (!name) return canvas

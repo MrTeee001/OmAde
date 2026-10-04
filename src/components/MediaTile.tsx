@@ -18,7 +18,7 @@ type Props = {
   videoRef?: Ref<HTMLVideoElement>
 }
 
-const GRADIENT = 'linear-gradient(135deg, #CFE3FF 0%, #FFFFFF 50%, #FFD3E4 100%)'
+const GRADIENT = 'var(--placeholder)' // soft blue → white → pink (night colours in dark mode)
 
 /**
  * Shows a photo or video from public/memories/.
@@ -55,13 +55,13 @@ export function MediaTile({
   if (media.kind === 'missing' || failed) {
     return (
       <div
-        className={`${base} ${placeholderClassName} flex items-center justify-center border border-white`}
+        className={`${base} ${placeholderClassName} flex items-center justify-center soft-border`}
         style={{ background: GRADIENT }}
         role="img"
         aria-label={alt || `Placeholder for ${name}`}
       >
         {/* Only empty spots get a label; a real file that failed to load just stays a soft tile. */}
-        {media.kind === 'missing' && <span className="label rounded-full bg-white/70 px-3 py-1">{name}</span>}
+        {media.kind === 'missing' && <span className="label surface-pill rounded-full px-3 py-1">{name}</span>}
       </div>
     )
   }
