@@ -7,6 +7,7 @@ import { Heart } from './Heart'
 import { prefersReducedMotion } from '../lib/motion'
 import { pauseScroll, resumeScroll } from '../lib/scroll'
 import { heroReady } from '../lib/ready'
+import { music } from '../lib/music'
 
 /**
  * The opening: an envelope rises and opens, the names pop up out of it with a
@@ -252,6 +253,33 @@ export function Intro({ onDone }: { onDone: () => void }) {
           .to(envelope, { rotation: 0, rotationX: 0, duration: 1.15, ease: 'back.out(1.4)' }, 0.1)
           .to(shadow, { opacity: 1, scaleX: 1, duration: 1.0, ease: 'sine.inOut' }, 0.25)
 
+        // 1b. Music: if the browser hasn't let the song start yet, wait here at the
+        // sealed letter for one tap ("Tap to open"); that tap starts the song and
+        // opens the letter together. Where the song is already playing, no wait.
+        tl.addPause(1.2, () => {
+          if (!music.needsTap()) return void tl.play()
+          const hint = q('[data-tap-hint]')[0] as HTMLElement
+          gsap.to(hint, { opacity: 1, y: 0, duration: 0.5, ease: 'sine.out' })
+          const pulse = gsap.to(q('[data-seal]'), { scale: 1.1, duration: 0.7, ease: 'sine.inOut', yoyo: true, repeat: -1 })
+          let done = false
+          const go = () => {
+            if (done) return
+            done = true
+            stopListening()
+            root.removeEventListener('pointerdown', onTap)
+            window.removeEventListener('keydown', onTap)
+            pulse.kill()
+            gsap.set(q('[data-seal]'), { scale: 1 })
+            gsap.to(hint, { opacity: 0, duration: 0.3 })
+            tl.play()
+          }
+          const stopListening = music.onStart(go)
+          // The tap also starts the song (Song listens for it); carry on even if audio fails.
+          const onTap = () => window.setTimeout(go, 450)
+          root.addEventListener('pointerdown', onTap)
+          window.addEventListener('keydown', onTap)
+        })
+
         // 2. Opening: seal pulse, then the top flap folds up toward the camera on its hinge
         tl.to(q('[data-seal]'), { scale: 1.14, duration: 0.14, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 1.2)
           .to(topFlap, { rotationX: 180, duration: 0.75, ease: 'power2.inOut' }, 1.5)
@@ -343,6 +371,11 @@ export function Intro({ onDone }: { onDone: () => void }) {
           </div>
         </div>
       )}
+
+      {/* Shown only if the browser needs a tap before the music can play. */}
+      <p data-tap-hint className="tap-hint label" aria-live="polite">
+        Tap to open
+      </p>
 
       {/* Shared colours for the envelope faces. */}
       <svg width="0" height="0" className="absolute" aria-hidden="true">

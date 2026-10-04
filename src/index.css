@@ -685,6 +685,17 @@ html.theme-fade, html.theme-fade * {
   font-variation-settings: 'SOFT' 100, 'WONK' 0;
 }
 .ribbon-bit { will-change: transform, opacity; }
+.tap-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(50% - min(520px, 82vw) * 0.32 - 92px);
+  text-align: center;
+  color: var(--color-ink-soft) !important;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+}
 .burst-bit {
   position: absolute;
   left: 0;

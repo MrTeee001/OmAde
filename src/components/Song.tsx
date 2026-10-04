@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { songUrl } from '../lib/media'
+import { music } from '../lib/music'
 
 /** The song starts from the beginning (it was trimmed before it was added) and loops back to the start. */
 const START_AT = 0
 /** Soft background level (0–1). */
-const VOLUME = 0.18
+const VOLUME = 0.12
 const FADE_IN = 2.5 // seconds
 
 // Remembered for this browser tab only, so a reload carries on where it was;
@@ -27,9 +28,10 @@ const write = (key: string, value: string) => {
 }
 
 /**
- * Background song. Browsers only allow sound after the visitor's first tap,
- * click or key press, so it tries to start straight away and otherwise starts
- * on that first touch. A small button lets anyone switch it off (or on again).
+ * Background song, on by default. It tries to start the moment the page loads;
+ * where the browser insists on a tap first (most phones), the opening waits at
+ * the letter for that tap ("Tap to open") and the music starts with it.
+ * Only the visitor can turn it off, with the small Music button.
  */
 export function Song() {
   const [on, setOn] = useState(() => read(KEY_OFF) !== '1')
@@ -38,6 +40,7 @@ export function Song() {
 
   useEffect(() => {
     if (!songUrl) return
+    music.setWanted(read(KEY_OFF) !== '1')
     const audio = new Audio(songUrl)
     audio.preload = 'auto'
 
@@ -97,6 +100,7 @@ export function Song() {
         .play()
         .then(() => {
           playing = true
+          music.setPlaying(true)
           fadeTo(VOLUME, FADE_IN)
           removeGestures()
         })
@@ -106,6 +110,7 @@ export function Song() {
     }
     const stop = () => {
       playing = false
+      music.setPlaying(false)
       fadeTo(0, 0.6)
       window.setTimeout(() => !playing && audio.pause(), 650)
     }
@@ -160,6 +165,7 @@ export function Song() {
   if (!songUrl) return null
 
   const toggle = () => {
+    music.setWanted(!on)
     if (on) {
       write(KEY_OFF, '1')
       api.current?.stop()
