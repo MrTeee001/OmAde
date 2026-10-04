@@ -60,7 +60,8 @@ export function MediaTile({
         role="img"
         aria-label={alt || `Placeholder for ${name}`}
       >
-        <span className="label rounded-full bg-white/70 px-3 py-1">{name}</span>
+        {/* Only empty spots get a label; a real file that failed to load just stays a soft tile. */}
+        {media.kind === 'missing' && <span className="label rounded-full bg-white/70 px-3 py-1">{name}</span>}
       </div>
     )
   }

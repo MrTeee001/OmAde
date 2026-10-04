@@ -9,8 +9,8 @@ export type FaceTexture = {
   dispose: () => void
 }
 
-/** Soft blue → white → pink tile with the file name, for missing media. */
-function drawPlaceholder(name: string, size: number): HTMLCanvasElement {
+/** Soft blue → white → pink tile; empty spots also get a small label (e.g. "PHOTO"). */
+function drawPlaceholder(name: string | null, size: number): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = size
   const ctx = canvas.getContext('2d')!
@@ -20,6 +20,7 @@ function drawPlaceholder(name: string, size: number): HTMLCanvasElement {
   g.addColorStop(1, '#FFD3E4')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, size, size)
+  if (!name) return canvas
 
   const font = Math.round(size * 0.045)
   ctx.font = `600 ${font}px "Manrope Variable", Manrope, system-ui, sans-serif`
@@ -63,7 +64,9 @@ function prepare(tex: THREE.Texture) {
  */
 export function createFaceTexture(name: string, size: number, onChange: (face: FaceTexture) => void): FaceTexture {
   const media = getMedia(name)
-  const placeholderCanvas = drawPlaceholder(name, size)
+  // Real files show no label while loading (or if they fail); empty spots say what goes there.
+  const label = media.kind === 'missing' ? name : null
+  const placeholderCanvas = drawPlaceholder(label, size)
   const placeholder = prepare(new THREE.CanvasTexture(placeholderCanvas))
   let disposed = false
   let current: THREE.Texture = placeholder
@@ -89,7 +92,7 @@ export function createFaceTexture(name: string, size: number, onChange: (face: F
   document.fonts?.ready.then(() => {
     if (disposed) return
     const ctx = placeholderCanvas.getContext('2d')!
-    ctx.drawImage(drawPlaceholder(name, size), 0, 0)
+    ctx.drawImage(drawPlaceholder(label, size), 0, 0)
     placeholder.needsUpdate = true
   })
 
